@@ -1,0 +1,21 @@
+{
+  "itemGroup.nexuscore.main": "NexusCore",
+  "key.categories.nexuscore": "NexusCore",
+  "key.nexuscore.debug_screen": "Open NexusCore Debug Screen",
+  "screen.nexuscore.debug": "NexusCore Debug",
+  "screen.nexuscore.debug.title": "NexusCore Debug Browser",
+  "screen.nexuscore.debug.sections": "Debug Sections",
+  "screen.nexuscore.debug.events": "Event Trace",
+  "screen.nexuscore.debug.client": "Client Descriptors",
+  "screen.nexuscore.debug.close_hint": "Press Escape to close",
+  "screen.nexuscore.config": "NexusCore Config",
+  "screen.nexuscore.config.title": "%s Config",
+  "screen.nexuscore.config.done": "Done",
+  "screen.nexuscore.config.reset": "Reset",
+  "screen.nexuscore.config.reset_all": "Reset All",
+  "screen.nexuscore.config.ready": "Ready",
+  "screen.nexuscore.config.updated": "Updated %s",
+  "screen.nexuscore.config.reset_status": "Reset %s",
+  "screen.nexuscore.config.reset_all_status": "Reset all options",
+  "screen.nexuscore.config.invalid_integer": "%s expects an integer"
+}

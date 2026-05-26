@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "nexuscore_example",
+  "version": "${version}",
+  "name": "NexusCore Example Mod",
+  "description": "Dual-loader example mod demonstrating NexusCore content builders, datagen, config, commands, debug hooks, transfer abstractions, and recipe viewer registration.",
+  "authors": ["${mod_author}"],
+  "license": "${mod_license}",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.rollylindenshnizzer.nexuscore.example.fabric.NexusCoreExampleFabric"],
+    "fabric-datagen": ["com.rollylindenshnizzer.nexuscore.example.fabric.NexusCoreExampleFabricDataGenerator"]
+  },
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "architectury": ">=${architectury_api_version}",
+    "owo": ">=${owo_lib_version}",
+    "nexuscore": ">=${version}",
+    "minecraft": "${minecraft_version}",
+    "java": ">=${java_version}"
+  },
+  "suggests": {
+    "jei": "*",
+    "emi": "*",
+    "roughlyenoughitems": "*",
+    "team_reborn_energy": "*"
+  }
+}

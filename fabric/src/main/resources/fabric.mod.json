@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": ["${mod_author}"],
+  "license": "${mod_license}",
+  "icon": "assets/${mod_id}/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.rollylindenshnizzer.nexuscore.fabric.NexusCoreFabric"],
+    "client": ["com.rollylindenshnizzer.nexuscore.fabric.NexusCoreFabricClient"],
+    "fabric-datagen": ["com.rollylindenshnizzer.nexuscore.fabric.NexusCoreFabricDataGenerator"],
+    "fabric-gametest": ["com.rollylindenshnizzer.nexuscore.fabric.test.NexusCoreFabricGameTests"],
+    "jei_mod_plugin": ["com.rollylindenshnizzer.nexuscore.fabric.compat.jei.NexusCoreFabricJeiPlugin"],
+    "emi": ["com.rollylindenshnizzer.nexuscore.fabric.compat.emi.NexusCoreFabricEmiPlugin"],
+    "rei_client": ["com.rollylindenshnizzer.nexuscore.fabric.compat.rei.NexusCoreFabricReiPlugin"]
+  },
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "architectury": ">=${architectury_api_version}",
+    "owo": ">=${owo_lib_version}",
+    "minecraft": "${minecraft_version}",
+    "java": ">=${java_version}"
+  },
+  "suggests": {
+    "jei": "*",
+    "emi": "*",
+    "roughlyenoughitems": "*",
+    "team_reborn_energy": "*"
+  }
+}
