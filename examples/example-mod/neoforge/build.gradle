@@ -44,7 +44,10 @@ dependencies {
     forgeRuntimeLibrary "io.wispforest.endec:jankson:0.1.3.1"
 
     compileOnly(project(path: ':common', configuration: 'namedElements')) { transitive = false }
-    modRuntimeOnly(project(path: ':neoforge', configuration: 'namedElements')) { transitive = false }
+
+    runtimeOnly(project(path: ':common', configuration: 'namedElements')) { transitive = false }
+    runtimeOnly(project(path: ':neoforge', configuration: 'namedElements')) { transitive = false }
+
     common(project(path: ':example-common', configuration: 'namedElements')) { transitive = false }
     shadowCommon(project(path: ':example-common', configuration: 'transformProductionNeoForge')) { transitive = false }
 }

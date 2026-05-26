@@ -15,7 +15,7 @@ ext.modName = 'NexusCore'
 ext.modDescription = 'Cross-loader helpers, builders, diagnostics, and utilities for Minecraft modding.'
 ext.modAuthor = 'rollylindenshnizzer'
 ext.modLicense = 'ARR'
-ext.modVersion = '1.0.0-build.1'
+ext.modVersion = '1.0.0-build.2'
 ext.mavenGroup = 'com.rollylindenshnizzer'
 ext.archivesBaseName = 'nexuscore'
 ext.jeiVersion = '19.27.0.340'
@@ -84,7 +84,7 @@ subprojects {
 
     processResources {
         def resourceProperties = [
-                version: '1.0.0-build.1',
+                version: '1.0.0-build.2',
                 mod_id: 'nexuscore',
                 mod_name: 'NexusCore',
                 mod_description: 'Cross-loader helpers, builders, diagnostics, and utilities for Minecraft modding.',

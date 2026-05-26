@@ -32,7 +32,10 @@ dependencies {
     modImplementation "io.wispforest:owo-lib:0.12.15.1+1.21"
 
     compileOnly(project(path: ':common', configuration: 'namedElements')) { transitive = false }
-    modRuntimeOnly(project(path: ':fabric', configuration: 'namedElements')) { transitive = false }
+
+    runtimeOnly(project(path: ':common', configuration: 'namedElements')) { transitive = false }
+    runtimeOnly(project(path: ':fabric', configuration: 'namedElements')) { transitive = false }
+
     common(project(path: ':example-common', configuration: 'namedElements')) { transitive = false }
     shadowCommon(project(path: ':example-common', configuration: 'transformProductionFabric')) { transitive = false }
 }
