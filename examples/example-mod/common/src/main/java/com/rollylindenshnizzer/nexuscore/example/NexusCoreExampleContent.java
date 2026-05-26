@@ -9,6 +9,7 @@ import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerCategor
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerDisplay;
 import com.rollylindenshnizzer.nexuscore.config.NexusConfig;
 import com.rollylindenshnizzer.nexuscore.core.NexusIds;
+import com.rollylindenshnizzer.nexuscore.core.NexusLifecycle;
 import com.rollylindenshnizzer.nexuscore.core.NexusMod;
 import com.rollylindenshnizzer.nexuscore.data.NexusData;
 import com.rollylindenshnizzer.nexuscore.data.RecipeJsonBuilder;
@@ -159,29 +160,16 @@ public final class NexusCoreExampleContent extends NexusMod {
                 .register();
 
         NexusNetworking.channel(MOD_ID, "main").version("1");
-        RecipeViewerBridge.category(new RecipeViewerCategory(id("ruby_workbench"),
-                Component.translatable("recipe_viewer.nexuscore_example.ruby_workbench"),
-                new ItemStack(ruby.get()), 132, 72, new ItemStack(rubyBlock.get())));
-        RecipeViewerBridge.display(RecipeViewerDisplay.builder(id("ruby_workbench_preview"), id("ruby_workbench"), 132, 72)
-                .page("infusion", page -> page
-                        .text(Component.literal("Ruby Infusion"), 42, 4, 0x404040, false)
-                        .itemInput(6, 20, new ItemStack(rawRuby.get()))
-                        .fluidInput(28, 12, 12, 36, 4_000, new FluidStack(Fluids.WATER, 1_000))
-                        .arrowProgress(52, 20, 2_000)
-                        .itemOutput(92, 20, new ItemStack(ruby.get()))
-                        .itemCatalyst(6, 50, new ItemStack(rubyBlock.get()))
-                        .tooltip(52, 20, 24, 17, List.of(Component.literal("Animated work progress")))
-                        .jeiTransferButton(98, 50)
-                        .viewerControl("emi", "recipe_tree", Map.of("enabled", "true"))
-                        .viewerControl("rei", "button", Map.of("x", "98", "y", "50", "width", "28", "height", "18", "text", "Info")))
-                .page("charging", page -> page
-                        .text(Component.literal("Charge Ruby Apple"), 34, 4, 0x404040, false)
-                        .itemInput(12, 24, new ItemStack(ruby.get()))
-                        .arrowProgress(52, 24, 1_200)
-                        .itemOutput(92, 24, new ItemStack(rubyApple.get()))
-                        .viewerControl("all", "tooltip", Map.of("x", "52", "y", "24", "width", "24", "height", "17",
-                                "text", "This page is a second recipe-viewer display page.")))
-                .build());
+
+        /*
+         * Do not call RegistrySupplier#get() directly during mod construction /
+         * early initialization. On NeoForge, the deferred registry entries may
+         * not be present yet.
+         *
+         * The recipe viewer content creates ItemStacks from registered objects,
+         * so it is deferred until COMMON_SETUP.
+         */
+        NexusLifecycle.on(NexusLifecycle.Phase.COMMON_SETUP, this::registerRecipeViewerContent);
 
         new QuickMoveRouter()
                 .route(new SlotRange(0, 1), new SlotRange(1, 37), stack -> true)
@@ -204,6 +192,33 @@ public final class NexusCoreExampleContent extends NexusMod {
         DebugRegistry.section("nexuscore_example.blocks", () -> Integer.toString(2));
         DebugRegistry.section("nexuscore_example.energy_cost", () -> Integer.toString(config.machineEnergyCost.get()));
         DebugRegistry.section("nexuscore_example.validation", () -> validation.passed() ? "passed" : validation.failures().toString());
+    }
+
+    private void registerRecipeViewerContent() {
+        RecipeViewerBridge.category(new RecipeViewerCategory(id("ruby_workbench"),
+                Component.translatable("recipe_viewer.nexuscore_example.ruby_workbench"),
+                new ItemStack(ruby.get()), 132, 72, new ItemStack(rubyBlock.get())));
+
+        RecipeViewerBridge.display(RecipeViewerDisplay.builder(id("ruby_workbench_preview"), id("ruby_workbench"), 132, 72)
+                .page("infusion", page -> page
+                        .text(Component.literal("Ruby Infusion"), 42, 4, 0x404040, false)
+                        .itemInput(6, 20, new ItemStack(rawRuby.get()))
+                        .fluidInput(28, 12, 12, 36, 4_000, new FluidStack(Fluids.WATER, 1_000))
+                        .arrowProgress(52, 20, 2_000)
+                        .itemOutput(92, 20, new ItemStack(ruby.get()))
+                        .itemCatalyst(6, 50, new ItemStack(rubyBlock.get()))
+                        .tooltip(52, 20, 24, 17, List.of(Component.literal("Animated work progress")))
+                        .jeiTransferButton(98, 50)
+                        .viewerControl("emi", "recipe_tree", Map.of("enabled", "true"))
+                        .viewerControl("rei", "button", Map.of("x", "98", "y", "50", "width", "28", "height", "18", "text", "Info")))
+                .page("charging", page -> page
+                        .text(Component.literal("Charge Ruby Apple"), 34, 4, 0x404040, false)
+                        .itemInput(12, 24, new ItemStack(ruby.get()))
+                        .arrowProgress(52, 24, 1_200)
+                        .itemOutput(92, 24, new ItemStack(rubyApple.get()))
+                        .viewerControl("all", "tooltip", Map.of("x", "52", "y", "24", "width", "24", "height", "17",
+                                "text", "This page is a second recipe-viewer display page.")))
+                .build());
     }
 
     private static ResourceLocation id(String path) {

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "nexuscore_example:item/raw_ruby"
+  }
+}
