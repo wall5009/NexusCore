@@ -3,6 +3,7 @@ package com.rollylindenshnizzer.nexuscore.fabric.compat.rei;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerAdvancedControl;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerBridge;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerCategory;
+import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerControlSupport;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerDisplayPage;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerProgressDirection;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerProgressWidget;
@@ -92,6 +93,7 @@ public final class NexusCoreFabricReiPlugin implements REIClientPlugin {
             }
             for (RecipeViewerAdvancedControl control : display.page.layout().controlsFor(display.page.page())) {
                 if (control.appliesTo("rei")) {
+                    RecipeViewerControlSupport.requireSupported("rei", control);
                     addControl(widgets, bounds, control);
                 }
             }
@@ -142,7 +144,19 @@ public final class NexusCoreFabricReiPlugin implements REIClientPlugin {
                                 control.intProperty("width", 40),
                                 control.intProperty("height", 20)),
                         Component.literal(control.property("text", ""))).enabled(control.booleanProperty("active", true)));
+                case "badge" -> widgets.add(Widgets.createLabel(new Point(
+                                bounds.x + control.intProperty("x", 0),
+                                bounds.y + control.intProperty("y", 0)),
+                        Component.literal(control.property("text", ""))).color(0xFFFFFFFF));
                 default -> {
+                    if (!RecipeViewerControlSupport.supports("rei", control)) {
+                        widgets.add(Widgets.createTooltip(new Rectangle(
+                                        bounds.x + control.intProperty("x", 0),
+                                        bounds.y + control.intProperty("y", 0),
+                                        control.intProperty("width", 1),
+                                        control.intProperty("height", 1)),
+                                Component.literal(RecipeViewerControlSupport.fallbackTooltip("rei", control))));
+                    }
                 }
             }
         }

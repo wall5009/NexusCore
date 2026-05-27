@@ -2,6 +2,7 @@ package com.rollylindenshnizzer.nexuscore;
 
 import com.rollylindenshnizzer.nexuscore.core.NexusDiagnostics;
 import com.rollylindenshnizzer.nexuscore.core.NexusLifecycle;
+import com.rollylindenshnizzer.nexuscore.command.NexusCoreCommands;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ public final class NexusCore {
         }
         initialized = true;
         NexusLifecycle.installArchitecturyHooks();
+        NexusCoreCommands.install();
         NexusLifecycle.fire(NexusLifecycle.Phase.PRE_INIT);
         NexusLifecycle.fire(NexusLifecycle.Phase.COMMON_INIT);
         NexusDiagnostics.startup(MOD_ID).log(LOGGER);

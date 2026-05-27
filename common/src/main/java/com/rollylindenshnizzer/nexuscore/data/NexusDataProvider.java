@@ -3,6 +3,7 @@ package com.rollylindenshnizzer.nexuscore.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.rollylindenshnizzer.nexuscore.registry.NexusContentManifest;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -43,6 +44,9 @@ public final class NexusDataProvider implements DataProvider {
                     output.getOutputFolder().resolve("data").resolve(modId).resolve(entry.getKey()),
                     entry.getValue()));
         }
+        future = future.thenCompose(ignored -> save(cachedOutput,
+                output.getOutputFolder().resolve("data").resolve(modId).resolve("nexus.content.json"),
+                NexusContentManifest.json(modId)));
         return future;
     }
 

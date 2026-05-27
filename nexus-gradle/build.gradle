@@ -1,0 +1,22 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+dependencies {
+    testImplementation gradleTestKit()
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+gradlePlugin {
+    plugins {
+        nexusCore {
+            id = 'com.rollylindenshnizzer.nexuscore'
+            implementationClass = 'com.rollylindenshnizzer.nexuscore.gradle.NexusCoreGradlePlugin'
+        }
+    }
+}

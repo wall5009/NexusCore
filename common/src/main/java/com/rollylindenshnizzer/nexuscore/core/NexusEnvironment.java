@@ -23,6 +23,19 @@ public final class NexusEnvironment {
         return Platform.getEnv();
     }
 
+    public static String loader() {
+        if (Platform.isFabric()) {
+            return "fabric";
+        }
+        if (Platform.isNeoForge()) {
+            return "neoforge";
+        }
+        if (Platform.isMinecraftForge()) {
+            return "forge";
+        }
+        return "unknown";
+    }
+
     public static boolean isDevelopment() {
         return Platform.isDevelopmentEnvironment();
     }

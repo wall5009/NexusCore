@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.rollylindenshnizzer.nexuscore.core.NexusException;
 import com.rollylindenshnizzer.nexuscore.core.NexusIds;
+import com.rollylindenshnizzer.nexuscore.registry.NexusContentManifest;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,6 +21,10 @@ public final class NexusData {
 
     public static DataPlan plan(String modId) {
         return PLANS.computeIfAbsent(NexusIds.requireNamespace(modId), DataPlan::new);
+    }
+
+    public static Map<String, DataPlan> plans() {
+        return Map.copyOf(PLANS);
     }
 
     private NexusData() {
@@ -37,6 +42,7 @@ public final class NexusData {
 
         public DataPlan translation(String key, String value) {
             translations.put(key, value);
+            NexusContentManifest.recordGenerated(modId, "translation", key);
             return this;
         }
 
@@ -47,6 +53,7 @@ public final class NexusData {
             textures.addProperty("layer0", modId + ":item/" + path);
             model.add("textures", textures);
             assets.put("models/item/" + path + ".json", model);
+            NexusContentManifest.recordGenerated(modId, "item_model", "models/item/" + path + ".json");
             return this;
         }
 
@@ -57,10 +64,12 @@ public final class NexusData {
             textures.addProperty("all", modId + ":block/" + path);
             model.add("textures", textures);
             assets.put("models/block/" + path + ".json", model);
+            NexusContentManifest.recordGenerated(modId, "block_model", "models/block/" + path + ".json");
 
             JsonObject itemModel = new JsonObject();
             itemModel.addProperty("parent", modId + ":block/" + path);
             assets.put("models/item/" + path + ".json", itemModel);
+            NexusContentManifest.recordGenerated(modId, "item_model", "models/item/" + path + ".json");
 
             JsonObject blockstate = new JsonObject();
             JsonObject variants = new JsonObject();
@@ -69,6 +78,7 @@ public final class NexusData {
             variants.add("", normal);
             blockstate.add("variants", variants);
             assets.put("blockstates/" + path + ".json", blockstate);
+            NexusContentManifest.recordGenerated(modId, "blockstate", "blockstates/" + path + ".json");
             return this;
         }
 
@@ -87,6 +97,7 @@ public final class NexusData {
             pools.add(pool);
             loot.add("pools", pools);
             data.put("loot_table/blocks/" + path + ".json", loot);
+            NexusContentManifest.recordGenerated(modId, "loot_table", "loot_table/blocks/" + path + ".json");
             return this;
         }
 
@@ -99,16 +110,19 @@ public final class NexusData {
             }
             tag.add("values", array);
             data.put("tags/" + registryFolder + "/" + tagPath + ".json", tag);
+            NexusContentManifest.recordGenerated(modId, "tag", "tags/" + registryFolder + "/" + tagPath + ".json");
             return this;
         }
 
         public DataPlan asset(String relativePath, JsonObject json) {
             assets.put(relativePath, json.deepCopy());
+            NexusContentManifest.recordGenerated(modId, "asset", relativePath);
             return this;
         }
 
         public DataPlan data(String relativePath, JsonObject json) {
             data.put(relativePath, json.deepCopy());
+            NexusContentManifest.recordGenerated(modId, "data", relativePath);
             return this;
         }
 
@@ -137,6 +151,8 @@ public final class NexusData {
                 for (Map.Entry<String, JsonObject> entry : data.entrySet()) {
                     writeJson(generatedRoot.resolve("data").resolve(modId).resolve(entry.getKey()), entry.getValue());
                 }
+                writeJson(generatedRoot.resolve("data").resolve(modId).resolve("nexus.content.json"),
+                        NexusContentManifest.json(modId));
             } catch (IOException exception) {
                 throw new NexusException("Failed to write generated data for " + modId, exception);
             }

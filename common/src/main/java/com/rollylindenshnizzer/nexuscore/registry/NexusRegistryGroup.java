@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -39,6 +40,13 @@ public final class NexusRegistryGroup {
     private final DeferredRegister<RecipeSerializer<?>> recipeSerializers;
     private final DeferredRegister<DataComponentType<?>> dataComponents;
     private final Map<String, Set<String>> paths = new HashMap<>();
+    private final Map<String, NexusRegistryGroup> children = new HashMap<>();
+    private final Set<String> tags = new HashSet<>();
+    private final Set<String> validationRules = new HashSet<>();
+    private String defaultCreativeTab = "";
+    private String translationPrefix = "";
+    private String assetPathPrefix = "";
+    private String datagenDefaults = "";
     private boolean registered;
 
     NexusRegistryGroup(String modId) {
@@ -106,7 +114,19 @@ public final class NexusRegistryGroup {
 
     public <T> RegistrySupplier<T> register(DeferredRegister<? super T> registry, String registryName, String path, Supplier<? extends T> supplier) {
         validateDuplicate(registryName, path);
-        return registry.register(NexusIds.normalizePath(path), supplier);
+        String normalized = NexusIds.normalizePath(path);
+        NexusContentManifest.record(modId, "root", registryName, modId + ":" + normalized,
+                NexusContentManifest.sourceHint(), "registry");
+        return registry.register(normalized, supplier);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> RegistrySupplier<DataComponentType<T>> dataComponent(String path, Supplier<DataComponentType<T>> supplier) {
+        validateDuplicate("data_component", path);
+        String normalized = NexusIds.normalizePath(path);
+        NexusContentManifest.record(modId, "root", "data_component", modId + ":" + normalized,
+                NexusContentManifest.sourceHint(), "registry");
+        return (RegistrySupplier) dataComponents.register(normalized, supplier);
     }
 
     public <T> void validateRegistryPath(String registryName, String path) {
@@ -130,6 +150,69 @@ public final class NexusRegistryGroup {
         recipeSerializers.register();
         dataComponents.register();
         NexusTasks.runQueued(TaskQueue.AFTER_REGISTRIES);
+    }
+
+    public NexusRegistryGroup child(String name) {
+        String childName = NexusIds.normalizePath(name).replace('/', '_');
+        return children.computeIfAbsent(childName, ignored -> new NexusRegistryGroup(modId));
+    }
+
+    public Map<String, NexusRegistryGroup> children() {
+        return Map.copyOf(children);
+    }
+
+    public NexusRegistryGroup tag(String tag) {
+        tags.add(tag);
+        return this;
+    }
+
+    public List<String> tags() {
+        return tags.stream().sorted().toList();
+    }
+
+    public NexusRegistryGroup defaultCreativeTab(String id) {
+        this.defaultCreativeTab = id == null ? "" : id;
+        return this;
+    }
+
+    public String defaultCreativeTab() {
+        return defaultCreativeTab;
+    }
+
+    public NexusRegistryGroup translationPrefix(String translationPrefix) {
+        this.translationPrefix = translationPrefix == null ? "" : translationPrefix;
+        return this;
+    }
+
+    public String translationPrefix() {
+        return translationPrefix;
+    }
+
+    public NexusRegistryGroup assetPathPrefix(String assetPathPrefix) {
+        this.assetPathPrefix = assetPathPrefix == null ? "" : assetPathPrefix;
+        return this;
+    }
+
+    public String assetPathPrefix() {
+        return assetPathPrefix;
+    }
+
+    public NexusRegistryGroup datagenDefaults(String datagenDefaults) {
+        this.datagenDefaults = datagenDefaults == null ? "" : datagenDefaults;
+        return this;
+    }
+
+    public String datagenDefaults() {
+        return datagenDefaults;
+    }
+
+    public NexusRegistryGroup validationRule(String rule) {
+        validationRules.add(rule);
+        return this;
+    }
+
+    public List<String> validationRules() {
+        return validationRules.stream().sorted().toList();
     }
 
     private void validateDuplicate(String registryName, String path) {

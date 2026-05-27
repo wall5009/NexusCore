@@ -11,8 +11,23 @@ public final class DataValidationReport {
         return this;
     }
 
+    public DataValidationReport error(String path, String message, String suggestion) {
+        issues.add(new Issue(Severity.ERROR, path, message, suggestion));
+        return this;
+    }
+
     public DataValidationReport warning(String path, String message) {
         issues.add(new Issue(Severity.WARNING, path, message));
+        return this;
+    }
+
+    public DataValidationReport warning(String path, String message, String suggestion) {
+        issues.add(new Issue(Severity.WARNING, path, message, suggestion));
+        return this;
+    }
+
+    public DataValidationReport merge(DataValidationReport other) {
+        issues.addAll(other.issues);
         return this;
     }
 
@@ -35,6 +50,9 @@ public final class DataValidationReport {
         ERROR
     }
 
-    public record Issue(Severity severity, String path, String message) {
+    public record Issue(Severity severity, String path, String message, String suggestion) {
+        public Issue(Severity severity, String path, String message) {
+            this(severity, path, message, "");
+        }
     }
 }

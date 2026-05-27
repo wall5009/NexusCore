@@ -4,6 +4,7 @@ import com.rollylindenshnizzer.nexuscore.NexusCore;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerAdvancedControl;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerBridge;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerCategory;
+import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerControlSupport;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerDisplayPage;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerProgressDirection;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerProgressWidget;
@@ -141,6 +142,7 @@ public final class NexusCoreFabricJeiPlugin implements IModPlugin {
             }
             for (RecipeViewerAdvancedControl control : display.layout().controlsFor(display.page())) {
                 if (control.appliesTo("jei")) {
+                    RecipeViewerControlSupport.requireSupported("jei", control);
                     applyControl(builder, control);
                 }
             }
@@ -155,6 +157,11 @@ public final class NexusCoreFabricJeiPlugin implements IModPlugin {
             for (var text : recipe.page().textWidgets()) {
                 graphics.drawString(Minecraft.getInstance().font, text.text(), text.x(), text.y(), text.color(), text.shadow());
             }
+            for (RecipeViewerAdvancedControl control : recipe.layout().controlsFor(recipe.page())) {
+                if (control.appliesTo("jei")) {
+                    drawControl(graphics, control);
+                }
+            }
         }
 
         @Override
@@ -166,9 +173,12 @@ public final class NexusCoreFabricJeiPlugin implements IModPlugin {
                 }
             }
             for (RecipeViewerAdvancedControl control : recipe.layout().controlsFor(recipe.page())) {
-                if (control.appliesTo("jei") && "tooltip".equals(control.type())
-                        && contains(control, mouseX, mouseY)) {
-                    tooltip.add(Component.literal(control.property("text", "")));
+                if (control.appliesTo("jei") && contains(control, mouseX, mouseY)) {
+                    if ("tooltip".equals(control.type())) {
+                        tooltip.add(Component.literal(control.property("text", "")));
+                    } else if (!RecipeViewerControlSupport.supports("jei", control)) {
+                        tooltip.add(Component.literal(RecipeViewerControlSupport.fallbackTooltip("jei", control)));
+                    }
                 }
             }
         }
@@ -184,8 +194,22 @@ public final class NexusCoreFabricJeiPlugin implements IModPlugin {
                         builder.setShapeless();
                     }
                 }
+                case "badge" -> {
+                }
                 default -> {
                 }
+            }
+        }
+
+        private static void drawControl(GuiGraphics graphics, RecipeViewerAdvancedControl control) {
+            if ("badge".equals(control.type()) || !RecipeViewerControlSupport.supports("jei", control)) {
+                int x = control.intProperty("x", 0);
+                int y = control.intProperty("y", 0);
+                int width = control.intProperty("width", 34);
+                int height = control.intProperty("height", 12);
+                graphics.fill(x, y, x + width, y + height, 0xAA26313D);
+                graphics.drawString(Minecraft.getInstance().font,
+                        control.property("text", control.type()), x + 3, y + 2, 0xFFFFFFFF, false);
             }
         }
 

@@ -2,7 +2,9 @@ package com.rollylindenshnizzer.nexuscore.client.debug;
 
 import com.rollylindenshnizzer.nexuscore.client.NexusClientDescriptors;
 import com.rollylindenshnizzer.nexuscore.debug.DebugRegistry;
+import com.rollylindenshnizzer.nexuscore.debug.NexusDoctor;
 import com.rollylindenshnizzer.nexuscore.event.EventTrace;
+import com.rollylindenshnizzer.nexuscore.network.NexusNetworking;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
@@ -46,11 +48,21 @@ public final class NexusDebugScreen extends BaseOwoScreen<FlowLayout> {
         columns.child(section("screen.nexuscore.debug.client", clientSections()));
         root.child(columns);
 
+        FlowLayout diagnostics = Containers.horizontalFlow(Sizing.fill(92), Sizing.fill(40));
+        diagnostics.gap(8);
+        diagnostics.child(section("screen.nexuscore.debug.doctor", doctorSections(), 46));
+        diagnostics.child(section("screen.nexuscore.debug.network", networkSections(), 46));
+        root.child(diagnostics);
+
         root.child(Components.label(Component.translatable("screen.nexuscore.debug.close_hint")));
     }
 
     private FlowLayout section(String titleKey, Iterable<String> lines) {
-        FlowLayout content = Containers.verticalFlow(Sizing.fill(33), Sizing.fill());
+        return section(titleKey, lines, 33);
+    }
+
+    private FlowLayout section(String titleKey, Iterable<String> lines, int widthPercent) {
+        FlowLayout content = Containers.verticalFlow(Sizing.fill(widthPercent), Sizing.fill());
         content.surface(Surface.DARK_PANEL)
                 .padding(Insets.of(8))
                 .horizontalAlignment(HorizontalAlignment.LEFT);
@@ -80,6 +92,19 @@ public final class NexusDebugScreen extends BaseOwoScreen<FlowLayout> {
     private Iterable<String> clientSections() {
         return NexusClientDescriptors.descriptors().stream()
                 .map(descriptor -> descriptor.id() + " (" + descriptor.getClass().getSimpleName() + ")")
+                .toList();
+    }
+
+    private Iterable<String> doctorSections() {
+        return NexusDoctor.run("nexuscore").issues().stream()
+                .map(issue -> issue.severity() + " " + issue.code() + ": " + issue.title())
+                .toList();
+    }
+
+    private Iterable<String> networkSections() {
+        return NexusNetworking.diagnostics().entrySet().stream()
+                .map(entry -> entry.getKey() + " v" + entry.getValue().protocolVersion()
+                        + " packets=" + entry.getValue().packets().size())
                 .toList();
     }
 }

@@ -16,7 +16,12 @@ public class ConfigOption<T> {
     private boolean worldReloadRequired;
     private boolean serverSynced;
     private boolean visible = true;
+    private boolean enabled = true;
     private String comment = "";
+    private String group = "general";
+    private String translationKey = "";
+    private final List<String> dependencies = new ArrayList<>();
+    private final List<String> conflicts = new ArrayList<>();
 
     protected ConfigOption(String key, T defaultValue) {
         this.key = Objects.requireNonNull(key, "key");
@@ -56,6 +61,16 @@ public class ConfigOption<T> {
         return this;
     }
 
+    public ConfigOption<T> group(String group) {
+        this.group = group == null || group.isBlank() ? "general" : group;
+        return this;
+    }
+
+    public ConfigOption<T> translationKey(String translationKey) {
+        this.translationKey = translationKey == null ? "" : translationKey;
+        return this;
+    }
+
     public ConfigOption<T> requiresRestart() {
         this.restartRequired = true;
         return this;
@@ -76,6 +91,21 @@ public class ConfigOption<T> {
         return this;
     }
 
+    public ConfigOption<T> enabledWhen(boolean enabled) {
+        this.enabled = enabled;
+        return this;
+    }
+
+    public ConfigOption<T> dependsOn(ConfigOption<?> option) {
+        dependencies.add(option.key());
+        return this;
+    }
+
+    public ConfigOption<T> conflictsWith(ConfigOption<?> option) {
+        conflicts.add(option.key());
+        return this;
+    }
+
     public boolean restartRequired() {
         return restartRequired;
     }
@@ -92,8 +122,28 @@ public class ConfigOption<T> {
         return visible;
     }
 
+    public boolean enabled() {
+        return enabled;
+    }
+
     public String comment() {
         return comment;
+    }
+
+    public String group() {
+        return group;
+    }
+
+    public String translationKey() {
+        return translationKey;
+    }
+
+    public List<String> dependencies() {
+        return List.copyOf(dependencies);
+    }
+
+    public List<String> conflicts() {
+        return List.copyOf(conflicts);
     }
 
     void validateCurrent() {

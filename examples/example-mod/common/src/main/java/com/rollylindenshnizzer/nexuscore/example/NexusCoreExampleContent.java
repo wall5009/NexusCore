@@ -1,12 +1,16 @@
 package com.rollylindenshnizzer.nexuscore.example;
 
 import com.rollylindenshnizzer.nexuscore.advancement.AdvancementJsonBuilder;
+import com.rollylindenshnizzer.nexuscore.block.NexusBlockSet;
+import com.rollylindenshnizzer.nexuscore.block.NexusBlockSets;
 import com.rollylindenshnizzer.nexuscore.block.NexusBlocks;
 import com.rollylindenshnizzer.nexuscore.command.NexusCommands;
 import com.rollylindenshnizzer.nexuscore.command.NexusDebugCommands;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerBridge;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerCategory;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerDisplay;
+import com.rollylindenshnizzer.nexuscore.component.NexusComponents;
+import com.rollylindenshnizzer.nexuscore.config.ConfigSchemaExporter;
 import com.rollylindenshnizzer.nexuscore.config.NexusConfig;
 import com.rollylindenshnizzer.nexuscore.core.NexusIds;
 import com.rollylindenshnizzer.nexuscore.core.NexusLifecycle;
@@ -26,8 +30,11 @@ import com.rollylindenshnizzer.nexuscore.performance.CooldownTracker;
 import com.rollylindenshnizzer.nexuscore.performance.ExpiringCache;
 import com.rollylindenshnizzer.nexuscore.test.ValidationSuite;
 import com.rollylindenshnizzer.nexuscore.worldgen.OreFeatureJsonBuilder;
+import com.mojang.serialization.Codec;
 import dev.architectury.registry.registries.RegistrySupplier;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -54,6 +61,8 @@ public final class NexusCoreExampleContent extends NexusMod {
     private RegistrySupplier<NexusItem> rubyApple;
     private RegistrySupplier<Block> rubyBlock;
     private RegistrySupplier<Block> rubyOre;
+    private RegistrySupplier<DataComponentType<String>> modeComponent;
+    private NexusBlockSet sapphireSet;
 
     private NexusCoreExampleContent() {
         super(MOD_ID);
@@ -143,6 +152,23 @@ public final class NexusCoreExampleContent extends NexusMod {
                 .needsIronTool()
                 .register();
 
+        modeComponent = NexusComponents.<String>item(MOD_ID, "mode")
+                .codec(Codec.STRING)
+                .streamCodec(ByteBufCodecs.STRING_UTF8)
+                .networkSynced()
+                .defaultValue("idle")
+                .cacheable()
+                .tooltip((mode, tooltip) -> tooltip.add(Component.literal("Mode: " + mode)))
+                .register();
+
+        sapphireSet = NexusBlockSets.gem(MOD_ID, "sapphire")
+                .material(MapColor.COLOR_BLUE)
+                .strength(4.0F, 5.0F)
+                .creativeTab(tab)
+                .generateRecipes()
+                .generateTags()
+                .register();
+
         populateGeneratedData();
     }
 
@@ -159,7 +185,10 @@ public final class NexusCoreExampleContent extends NexusMod {
                 .feedback(Component.literal("NexusCore example command registered"))
                 .register();
 
-        NexusNetworking.channel(MOD_ID, "main").version("1");
+        NexusNetworking.channel(MOD_ID, "main")
+                .protocolVersion("1.1")
+                .disconnectOnMismatch((client, server) -> "NexusCore example protocol mismatch: client " + client + ", server " + server);
+        ConfigSchemaExporter.jsonSchema(config, "1.1");
 
         /*
          * Do not call RegistrySupplier#get() directly during mod construction /
@@ -190,6 +219,8 @@ public final class NexusCoreExampleContent extends NexusMod {
 
         DebugRegistry.section("nexuscore_example.items", () -> Integer.toString(registeredItemCount.get()));
         DebugRegistry.section("nexuscore_example.blocks", () -> Integer.toString(2));
+        DebugRegistry.section("nexuscore_example.block_set", () -> sapphireSet.blocks().keySet().toString());
+        DebugRegistry.section("nexuscore_example.component", () -> MOD_ID + ":mode");
         DebugRegistry.section("nexuscore_example.energy_cost", () -> Integer.toString(config.machineEnergyCost.get()));
         DebugRegistry.section("nexuscore_example.validation", () -> validation.passed() ? "passed" : validation.failures().toString());
     }
@@ -230,8 +261,11 @@ public final class NexusCoreExampleContent extends NexusMod {
 
         private ExampleConfig() {
             super(MOD_ID);
-            machineEnergyCost = intOption("machine_energy_cost", 100)
-                    .range(1, 10_000)
+            machineEnergyCost = intOption("machine_energy_cost", 100).range(1, 10_000);
+            machineEnergyCost
+                    .group("machine")
+                    .comment("Energy consumed by the example ruby press each operation.")
+                    .translationKey("config.nexuscore_example.machine_energy_cost")
                     .serverSynced()
                     .requiresWorldReload();
         }

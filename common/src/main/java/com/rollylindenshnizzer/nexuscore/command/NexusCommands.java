@@ -61,6 +61,11 @@ public final class NexusCommands {
             return this;
         }
 
+        public CommandBuilder then(LiteralArgumentBuilder<CommandSourceStack> child) {
+            builder.then(child);
+            return this;
+        }
+
         public CommandBuilder feedback(Component message) {
             builder.executes(context -> {
                 context.getSource().sendSuccess(() -> message, false);
@@ -71,6 +76,10 @@ public final class NexusCommands {
 
         public LiteralArgumentBuilder<CommandSourceStack> build() {
             return builder;
+        }
+
+        public String usagePreview() {
+            return "/" + builder.getLiteral();
         }
 
         public void register() {

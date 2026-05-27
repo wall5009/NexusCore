@@ -1,6 +1,6 @@
 # NexusCore
 
-NexusCore is a Minecraft 1.21.1 Architectury library mod for Fabric and NeoForge. It provides practical APIs for registry setup, item and block builders, datagen, config validation, owo-powered UI/debugging, networking, machines, inventories, energy, fluids, recipe viewer integrations, GameTests, diagnostics, and general modding utilities.
+NexusCore is a Minecraft 1.21.1 Architectury library mod for Fabric and NeoForge. Version 1.1 focuses on production hardening and authoring speed: API stability annotations, datagen validation, content manifests, config schema export, protocol diagnostics, data component helpers, Nexus Doctor reports, scaffolding, and richer examples.
 
 ## Modules
 
@@ -22,6 +22,7 @@ NexusCore is a Minecraft 1.21.1 Architectury library mod for Fabric and NeoForge
 - Runtime systems: networking, packet guards, persistence/codecs/NBT, data components, attachments, player/world helpers, raycasts, teleport targets, math, performance helpers, machines, energy, fluids, inventories, and recipe caches.
 - Compatibility: concrete JEI, EMI, and REI plugins with custom recipe layouts, fluids, animated progress, multi-page displays, and viewer-specific controls, plus Fabric Team Reborn Energy and NeoForge capability adapters.
 - Testing: validation suites, assertions, fake inventories, registered Fabric and NeoForge GameTests, and bundled test structures.
+- v1.1 workflow: optional Gradle plugin, starter templates, `/nexus` diagnostics, API reports, release metadata, and CI validation.
 
 ## Build
 

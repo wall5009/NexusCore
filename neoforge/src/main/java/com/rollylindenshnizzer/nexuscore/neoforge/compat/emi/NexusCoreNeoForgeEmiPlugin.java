@@ -3,6 +3,7 @@ package com.rollylindenshnizzer.nexuscore.neoforge.compat.emi;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerAdvancedControl;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerBridge;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerCategory;
+import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerControlSupport;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerDisplayPage;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerProgressWidget;
 import com.rollylindenshnizzer.nexuscore.compat.recipeviewer.RecipeViewerRole;
@@ -66,6 +67,7 @@ public final class NexusCoreNeoForgeEmiPlugin implements EmiPlugin {
             }
             for (RecipeViewerAdvancedControl control : page.layout().controlsFor(page.page())) {
                 if (control.appliesTo("emi")) {
+                    RecipeViewerControlSupport.requireSupported("emi", control);
                     addControl(widgets, control);
                 }
             }
@@ -168,7 +170,15 @@ public final class NexusCoreNeoForgeEmiPlugin implements EmiPlugin {
                                 });
                     }
                 }
+                case "badge" -> widgets.addText(Component.literal(control.property("text", "")),
+                        control.intProperty("x", 0), control.intProperty("y", 0),
+                        0xFFFFFFFF, false);
                 default -> {
+                    if (!RecipeViewerControlSupport.supports("emi", control)) {
+                        widgets.addTooltipText(List.of(Component.literal(RecipeViewerControlSupport.fallbackTooltip("emi", control))),
+                                control.intProperty("x", 0), control.intProperty("y", 0),
+                                control.intProperty("width", 1), control.intProperty("height", 1));
+                    }
                 }
             }
         }
