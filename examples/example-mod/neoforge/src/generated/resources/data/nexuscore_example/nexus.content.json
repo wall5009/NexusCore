@@ -1,0 +1,407 @@
+{
+  "configFiles": [
+    "nexuscore_example"
+  ],
+  "entries": [
+    {
+      "type": "block_model",
+      "group": "generated",
+      "id": "models/block/ruby_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:67"
+    },
+    {
+      "type": "block_model",
+      "group": "generated",
+      "id": "models/block/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:67"
+    },
+    {
+      "type": "block_model",
+      "group": "generated",
+      "id": "models/block/sapphire_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:67"
+    },
+    {
+      "type": "block_model",
+      "group": "generated",
+      "id": "models/block/sapphire_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:67"
+    },
+    {
+      "type": "blockstate",
+      "group": "generated",
+      "id": "blockstates/ruby_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:81"
+    },
+    {
+      "type": "blockstate",
+      "group": "generated",
+      "id": "blockstates/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:81"
+    },
+    {
+      "type": "blockstate",
+      "group": "generated",
+      "id": "blockstates/sapphire_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:81"
+    },
+    {
+      "type": "blockstate",
+      "group": "generated",
+      "id": "blockstates/sapphire_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:81"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "advancement/root.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "advancement/root.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "recipe/ruby_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "recipe/ruby_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "recipe/ruby_from_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "recipe/ruby_from_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "recipe/ruby_from_smelting.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "recipe/ruby_from_smelting.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "recipe/sapphire_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "worldgen/configured_feature/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "worldgen/configured_feature/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data_component",
+      "group": "root",
+      "id": "nexuscore_example:mode",
+      "owner": "registry",
+      "source": "com.rollylindenshnizzer.nexuscore.registry.NexusRegistryGroup:128"
+    },
+    {
+      "type": "item_model",
+      "group": "generated",
+      "id": "models/item/raw_ruby.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:56"
+    },
+    {
+      "type": "item_model",
+      "group": "generated",
+      "id": "models/item/ruby.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:56"
+    },
+    {
+      "type": "item_model",
+      "group": "generated",
+      "id": "models/item/ruby_apple.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:56"
+    },
+    {
+      "type": "item_model",
+      "group": "generated",
+      "id": "models/item/ruby_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:72"
+    },
+    {
+      "type": "item_model",
+      "group": "generated",
+      "id": "models/item/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:72"
+    },
+    {
+      "type": "item_model",
+      "group": "generated",
+      "id": "models/item/sapphire_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:72"
+    },
+    {
+      "type": "item_model",
+      "group": "generated",
+      "id": "models/item/sapphire_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:72"
+    },
+    {
+      "type": "loot_table",
+      "group": "generated",
+      "id": "loot_table/blocks/ruby_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:100"
+    },
+    {
+      "type": "loot_table",
+      "group": "generated",
+      "id": "loot_table/blocks/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:100"
+    },
+    {
+      "type": "loot_table",
+      "group": "generated",
+      "id": "loot_table/blocks/sapphire_block.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:100"
+    },
+    {
+      "type": "loot_table",
+      "group": "generated",
+      "id": "loot_table/blocks/sapphire_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:100"
+    },
+    {
+      "type": "tag",
+      "group": "generated",
+      "id": "tags/blocks/mineable/pickaxe.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:113"
+    },
+    {
+      "type": "tag",
+      "group": "generated",
+      "id": "tags/blocks/mineable/pickaxe.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:113"
+    },
+    {
+      "type": "tag",
+      "group": "generated",
+      "id": "tags/blocks/mineable/pickaxe.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:113"
+    },
+    {
+      "type": "tag",
+      "group": "generated",
+      "id": "tags/blocks/mineable/pickaxe.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:113"
+    },
+    {
+      "type": "tag",
+      "group": "generated",
+      "id": "tags/blocks/needs_iron_tool.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:113"
+    },
+    {
+      "type": "tag",
+      "group": "generated",
+      "id": "tags/blocks/needs_iron_tool.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:113"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "advancements.nexuscore_example.root.description",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "advancements.nexuscore_example.root.description",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "advancements.nexuscore_example.root.title",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "advancements.nexuscore_example.root.title",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "block.nexuscore_example.ruby_block",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "block.nexuscore_example.ruby_ore",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "block.nexuscore_example.sapphire_block",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "block.nexuscore_example.sapphire_block",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "block.nexuscore_example.sapphire_ore",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "item.nexuscore_example.raw_ruby",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "item.nexuscore_example.ruby",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "item.nexuscore_example.ruby_apple",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "itemGroup.nexuscore_example.main",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "itemGroup.nexuscore_example.main",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "recipe_viewer.nexuscore_example.ruby_workbench",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "recipe_viewer.nexuscore_example.ruby_workbench",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "tooltip.nexuscore_example.raw_ruby",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "tooltip.nexuscore_example.raw_ruby",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "tooltip.nexuscore_example.ruby",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    },
+    {
+      "type": "translation",
+      "group": "generated",
+      "id": "tooltip.nexuscore_example.ruby",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:45"
+    }
+  ],
+  "modId": "nexuscore_example"
+}

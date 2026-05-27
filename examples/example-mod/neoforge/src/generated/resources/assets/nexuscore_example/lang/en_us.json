@@ -3,6 +3,8 @@
   "advancements.nexuscore_example.root.title": "NexusCore Example",
   "block.nexuscore_example.ruby_block": "Ruby Block",
   "block.nexuscore_example.ruby_ore": "Ruby Ore",
+  "block.nexuscore_example.sapphire_block": "sapphire Block",
+  "block.nexuscore_example.sapphire_ore": "Sapphire Ore",
   "item.nexuscore_example.raw_ruby": "Raw Ruby",
   "item.nexuscore_example.ruby": "Ruby",
   "item.nexuscore_example.ruby_apple": "Ruby Apple",
