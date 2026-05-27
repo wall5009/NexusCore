@@ -1,46 +1,105 @@
 # Architecture
 
-NexusCore is split by responsibility:
+NexusCore is organized around one rule: common code declares portable intent, loader modules perform loader-specific wiring, and client-only runtime code stays behind client entrypoints.
 
-- `common`: loader-neutral public API, builders, data plans, config, diagnostics, recipe viewer descriptors, test helpers, machine utilities, and UI descriptors.
-- `fabric`: Fabric entrypoints, Fabric datagen, Fabric GameTest entrypoint, Team Reborn Energy bridge, Fabric Transfer fluid bridge, and Fabric JEI/EMI/REI plugins.
-- `neoforge`: NeoForge entrypoint, NeoForge datagen, NeoForge GameTest registration, NeoForge energy/fluid capability adapters, and NeoForge JEI/EMI/REI plugins.
-- `examples/example-mod/*`: a real dual-loader mod consuming the library from shared code.
+## Layers
 
-## Initialization Flow
+| Layer | Packages | Responsibility |
+| --- | --- | --- |
+| Bootstrap | `core` | Initialization, lifecycle, environment checks, diagnostics, task queues, IDs |
+| Registration | `registry`, `item`, `block`, `blockentity`, `entity`, `sound`, `menu` | Deferred registration and content builders |
+| Data | `data`, `resource`, `worldgen`, `advancement`, `loot`, `tag` | Generated JSON, typed datapack loading, validation, manifests |
+| Runtime | `machine`, `inventory`, `energy`, `fluid`, `network`, `persistence`, `player`, `world`, `security` | Gameplay systems and cross-loader abstractions |
+| Client | `client`, `ui` | Common-safe descriptors plus client-only owo screens, debug browser, profiler HUD, machine screen runtime |
+| Integration | `compat` | Optional JEI/EMI/REI, loader transfer/capability, safe classloading |
+| Tooling | `test`, `performance`, `nexus-gradle` | GameTests, assertions, benchmarks, ABI checks, docs/release tasks, scaffolding |
 
-`NexusCore.init()` installs shared lifecycle hooks and logs diagnostics. `NexusMod.init()` adds a mod-level sequence:
+## Bootstrap Contract
 
-1. Guard against duplicate init.
-2. Install Architectury lifecycle hooks.
-3. Fire `PRE_INIT`.
-4. Run `beforeRegistries()`.
-5. Initialize content modules.
-6. Register the mod's registry group.
-7. Run `onInitialize()`.
-8. Fire `COMMON_INIT` and validation phases.
-9. Log startup diagnostics.
+`NexusMod` gives consumers a predictable sequence:
 
-This keeps registry declarations separate from runtime setup.
+1. Install shared lifecycle hooks.
+2. Fire `PRE_INIT`.
+3. Run `beforeRegistries`.
+4. Initialize dependency-sorted `ContentModule`s.
+5. Register the mod's `NexusRegistryGroup`.
+6. Run `onInitialize`.
+7. Fire common init and validation phases.
+8. Emit startup diagnostics.
 
-## Loader Boundaries
+Registry declarations belong before step 5. Runtime logic belongs after step 5.
 
-Common code never imports Fabric-only or NeoForge-only APIs. Loader modules adapt NexusCore abstractions to the active platform:
+## Common/Loader Boundary
 
-- Fabric energy: `FabricTransferBridges.energy` returns Team Reborn `EnergyStorage`.
-- Fabric fluids: `FabricTransferBridges.fluid` returns Fabric Transfer `Storage<FluidVariant>`.
-- NeoForge energy: `NeoForgeCapabilities.energy` returns `IEnergyStorage`.
-- NeoForge fluids: `NeoForgeCapabilities.fluid` returns `IFluidHandler`.
+Common code may:
 
-## Optional Integrations
+- Define item/block/entity/machine/worldgen/resource descriptors.
+- Register deferred registry entries through Architectury-backed wrappers.
+- Build datagen plans.
+- Declare versioned network channels.
+- Define recipe viewer categories/displays.
+- Create client descriptors that contain only IDs and metadata.
+- Run validation and pure Java tests.
 
-Recipe viewer support has two layers:
+Loader code should:
 
-- Common mods register categories and displays through `RecipeViewerBridge`.
-- Loader modules expose those displays to JEI, EMI, and REI through real plugin classes.
+- Call the common bootstrap.
+- Register loader datagen providers.
+- Expose Fabric Transfer, Team Reborn Energy, or NeoForge capabilities.
+- Install loader-specific JEI/EMI/REI plugin classes.
+- Register GameTest entrypoints.
 
-The optional viewer mods are not required to load NexusCore. They are compile-only in Gradle and optional/suggested in metadata.
+Client code should:
 
-## owo-lib
+- Install keybind actions, HUD layers, renderers, color providers, render layers, and screens.
+- Open generated owo config screens and machine screens.
+- Render debug browser/profiler UI.
 
-owo-lib is a real dependency, not a placeholder. Common code compiles against `io.wispforest:owo-lib`, Fabric runtime requires `owo`, and NeoForge runtime requires `owo-lib-neoforge` plus its runtime libraries. The debug screen uses owo UI classes directly; the config bridge detects owo availability and gives config systems a stable integration point.
+## Descriptor Pattern
+
+Most v1.2 systems use descriptors:
+
+- `NexusMachineDefinition`
+- `MachineRecipeDefinition`
+- `MachineScreenLayout`
+- `NexusEntityDefinition`
+- `ProjectileDefinition`
+- `OreGenerationBuilder`
+- `ClientDescriptor`
+- `ClientEffectSpec`
+- `RecipeViewerDisplay`
+- `PlayerAttachmentSpec`
+- `CustomRegistrySpec`
+
+Descriptors are small immutable records or builders. They are easy to validate, emit into docs/debug views, use for datagen, and adapt per loader.
+
+## Diagnostics Pattern
+
+Every major system exposes one or more of:
+
+- A debug registry section.
+- A validation report.
+- A doctor report entry.
+- A generated manifest entry.
+- A GameTest or validation suite scenario.
+
+This is deliberate. NexusCore is meant to make modding easier by making failure states visible before a user reports them.
+
+## Optional Dependency Pattern
+
+Optional integrations are loaded through metadata and safe classloading:
+
+- Recipe viewers are optional. The shared API is always available; concrete JEI/EMI/REI plugins load only when present.
+- owo-lib is required by NexusCore client screens but common config definitions remain server-safe.
+- Fabric energy uses Team Reborn Energy. NeoForge energy uses capabilities.
+- Loader bridges are isolated in loader modules so common code stays portable.
+
+## Example Reference
+
+The example mod follows this architecture:
+
+- `NexusCoreExampleContent` owns normal mod bootstrap and content.
+- `NexusCoreExampleSystems` gives compile-checked coverage for every subsystem.
+- Fabric and NeoForge modules only adapt loader entrypoints and datagen.
+
+Read `docs/example-mod-walkthrough.md` for a detailed tour.

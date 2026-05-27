@@ -1,6 +1,8 @@
 package com.rollylindenshnizzer.nexuscore.fabric;
 
 import com.rollylindenshnizzer.nexuscore.NexusCore;
+import com.rollylindenshnizzer.nexuscore.core.NexusLifecycle;
+import com.rollylindenshnizzer.nexuscore.fabric.worldgen.FabricWorldgenRegistrar;
 import net.fabricmc.api.ModInitializer;
 
 /**
@@ -13,5 +15,6 @@ public final class NexusCoreFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         NexusCore.init();
+        NexusLifecycle.on(NexusLifecycle.Phase.COMMON_SETUP, FabricWorldgenRegistrar::install);
     }
 }

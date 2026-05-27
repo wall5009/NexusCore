@@ -1,31 +1,34 @@
 # Debugging Guide
 
-NexusCore includes diagnostics, debug commands, report export, and an owo-powered debug browser.
-
-## Startup Diagnostics
-
-`NexusDiagnostics.startup(modId)` reports environment, lifecycle, and registry information. `NexusCore.init()` and `NexusMod.init()` log startup diagnostics automatically.
+NexusCore treats diagnostics as a first-class API. Each subsystem should expose enough state to explain what was registered, what generated, what loaded, and what failed.
 
 ## Debug Registry
 
-Register live sections:
+Register short live sections:
 
 ```java
-DebugRegistry.section("example.energy", () -> Long.toString(storage.amount()));
-DebugRegistry.section("example.mode", () -> mode.name());
+DebugRegistry.section("example.machine", () -> state.status() + " progress=" + state.progressFraction());
+DebugRegistry.section("example.resources", () -> resourceReport.summary());
 ```
 
-Sections are read lazily, so values can reflect runtime state.
+Good debug sections are:
 
-## Commands
+- Cheap to compute.
+- Side-safe.
+- Short enough for commands.
+- Stable enough for support reports.
 
-Install the built-in debug command tree:
+The example mod registers sections for items, blocks, components, config, machine state, validation, systems, datapack loading, benchmarks, registry reports, menus, and entities.
+
+## Debug Commands
+
+Install debug commands for a mod:
 
 ```java
 NexusDebugCommands.install(MOD_ID);
 ```
 
-Use `NexusCommands.literal(...)` for regular commands:
+Register a simple command:
 
 ```java
 NexusCommands.literal("example")
@@ -34,10 +37,79 @@ NexusCommands.literal("example")
         .register();
 ```
 
-## Debug UI And owo-lib
+`NexusCoreCommands.install()` installs the core `/nexus` diagnostics.
 
-The UI module does properly depend on owo-lib. `NexusDebugScreen` imports owo UI classes directly, common compiles against owo-lib, and both loader modules require owo at runtime. The client entrypoint initializes `NexusCoreClient`, which registers the F9 debug browser. The screen reads `DebugRegistry` sections and presents them through owo components.
+## Doctor Reports
 
-## Reports
+`NexusDoctor` can check:
 
-`ReportExporter` can be used to serialize debug output for issue reports. Prefer adding high-signal sections to `DebugRegistry` instead of logging large dumps every tick.
+- Module alignment.
+- Content manifest entries.
+- Datagen validation.
+- Config dependency graphs.
+- Packet declarations.
+- Migration diagnostics.
+
+```java
+DoctorReport report = NexusDoctor.create(MOD_ID)
+        .checkModules()
+        .checkContent()
+        .checkDatagen()
+        .checkConfigs()
+        .checkPackets()
+        .checkMigrations()
+        .run();
+```
+
+Write reports with `writeReportsTo(path)` for release artifacts.
+
+## Datagen Reports
+
+```java
+DataValidationReport report = NexusDataValidator.validatePlan(plan);
+DatagenReportWriters.writeMarkdown(report, output.resolve("datagen.md"));
+```
+
+Warnings should be reviewed before release. Errors should block release.
+
+## Crash Hints
+
+`CrashHints` and `CrashHintClassifier` turn common failures into targeted guidance:
+
+- Client class loaded on dedicated server.
+- Registry object accessed too early.
+- Codec field errors.
+- Packet/network failures.
+
+Register project-specific hints:
+
+```java
+CrashHints.register("example_missing_texture", "Check generated model paths.");
+```
+
+## Event Trace
+
+`EventTrace` keeps a bounded list of timestamped events:
+
+```java
+EventTrace.record("machine", "recipe started");
+EventTrace.maxEntries(512);
+```
+
+Use this for high-level breadcrumbs, not per-tick spam.
+
+## Profiler HUD
+
+`NamedProfiler.global()` records named sections:
+
+```java
+try (NamedProfiler.Section ignored = NamedProfiler.global().section("example.machine_tick")) {
+    engine.tick(recipes, false);
+}
+```
+
+On the client, the Nexus profiler HUD can display top sections.
+
+## Example
+
+`NexusCoreExampleSystems` demonstrates crash hints, doctor reports, datagen validation summaries, registry reports, debug sections, event traces, and profiler data.

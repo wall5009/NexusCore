@@ -65,7 +65,8 @@ public final class MachineState {
     public boolean redstoneAllows(boolean powered) {
         return redstoneMode == RedstoneControlMode.IGNORED
                 || redstoneMode == RedstoneControlMode.HIGH && powered
-                || redstoneMode == RedstoneControlMode.LOW && !powered;
+                || redstoneMode == RedstoneControlMode.LOW && !powered
+                || redstoneMode == RedstoneControlMode.PULSE && powered;
     }
 
     public void redstoneMode(RedstoneControlMode redstoneMode) {

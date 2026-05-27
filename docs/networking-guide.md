@@ -1,30 +1,119 @@
 # Networking Guide
 
-`NexusNetworking` wraps Architectury networking into named, versioned channels.
+`NexusNetworking` wraps Architectury networking into named, versioned channels and pairs it with diagnostics, packet guards, request/response helpers, sync batching, and test harnesses.
 
-## Create A Channel
+## Channels
 
 ```java
-NexusNetworking.channel(MOD_ID, "main")
-        .version("1");
+NexusNetworking.ChannelBuilder channel = NexusNetworking.channel(MOD_ID, "main")
+        .protocolVersion("1.2")
+        .disconnectOnMismatch((client, server) ->
+                "Protocol mismatch: client=" + client + ", server=" + server);
 ```
 
-Use one channel per logical protocol. Bump the version when packet payloads are not backward compatible.
+Use one channel per logical protocol. Bump the version when packet payloads or required packet sets are not backward compatible.
+
+## Packet Registration
+
+The channel can register serverbound and clientbound Architectury simple messages:
+
+```java
+channel.serverbound("set_mode", SetModePacket::new);
+channel.clientbound("sync_state", SyncStatePacket::new);
+```
+
+The registered packet paths are tracked in `NexusNetworking.diagnostics()`.
+
+## Handshake Diagnostics
+
+Each channel stores:
+
+- Channel ID.
+- Local protocol version.
+- Registered packet names.
+- Mismatch message factory.
+
+Compare remote metadata:
+
+```java
+NexusNetworking.ChannelDiagnostics diagnostics = NexusNetworking.diagnostics().get(channel.id("main"));
+HandshakeReport report = diagnostics.compare(remoteVersion, remotePackets);
+```
+
+Use this in debug screens and support reports.
 
 ## Packet Guards
 
-`PacketGuards` centralizes checks before handling packets:
+Packet handlers should validate before mutating anything:
 
-- Side and environment checks.
-- Permission checks.
-- Null or invalid payload checks.
-- Friendly `PacketValidationException` errors.
+```java
+PacketGuards.requireServerSide(packetId, context);
+ServerPlayer player = PacketGuards.requireServerPlayer(packetId, context);
+PacketGuards.runOnMainThread(context, () -> mutateState(player));
+```
 
-Keep packet validation close to the handler boundary. Common game logic should receive already-validated inputs.
+Pair packet guards with `ServerAuthority`:
 
-## Practical Pattern
+- `requireServer`
+- `antiSpam`
+- `withinDistance`
+- `sameDimension`
+- `canOpenMenu`
 
-1. Declare the channel during `onInitialize()`.
-2. Register packet types from common code where possible.
-3. Gate client-only handlers behind loader/client entrypoints.
-4. Use `PacketGuards` before mutating world, player, or block entity state.
+## Request/Response
+
+`RequestResponse<R>` tracks pending async-style flows:
+
+```java
+RequestResponse<String> requests = new RequestResponse<>();
+UUID id = requests.begin(Duration.ofSeconds(5));
+requests.success(id, "accepted");
+Optional<RequestResponse.Result<String>> result = requests.poll(id);
+```
+
+## Sync Batching
+
+`SyncBatcher<T>` groups dirty values and flushes them after a throttle interval:
+
+```java
+SyncBatcher<ResourceLocation> batcher = new SyncBatcher<>(Duration.ofMillis(50));
+batcher.markDirty(id("ruby_press"));
+batcher.flushIfReady(values -> sendSync(values));
+```
+
+Use `SyncProfile` to document sync intent: always, nearby players, menu viewers, chunk watchers, or manual.
+
+## Network Monitor
+
+```java
+NetworkMonitor.record(packetId, byteCount, exceptionOrNull);
+Map<ResourceLocation, NetworkMonitor.Stats> snapshot = NetworkMonitor.snapshot();
+```
+
+Stats include count, total bytes, exception count, and average bytes.
+
+## Packet Test Harness
+
+Use this for pure-Java payload tests:
+
+```java
+PacketTestHarness.assertRoundTrip(new ExamplePacket(42),
+        (buffer, packet) -> buffer.writeInt(packet.value()),
+        buffer -> new ExamplePacket(buffer.readInt()));
+```
+
+This catches serialization mismatches without starting Minecraft.
+
+## Menus
+
+Register menus through `NexusMenus`:
+
+```java
+RegistrySupplier<MenuType<ChestMenu>> menu = NexusMenus.menu(MOD_ID, "tutorial_chest_menu", ChestMenu::threeRows);
+```
+
+Use `MenuBinding` and `MenuDebugInfo` to document target bindings, quick-move routes, and sync fields.
+
+## Example
+
+The example mod declares a main channel in `NexusCoreExampleContent` and a diagnostics channel in `NexusCoreExampleSystems.demonstrateNetworking`. It also records network stats, tests a packet round trip, demonstrates request/response, and flushes a sync batch.

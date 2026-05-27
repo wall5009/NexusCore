@@ -18,20 +18,32 @@ import com.rollylindenshnizzer.nexuscore.core.NexusMod;
 import com.rollylindenshnizzer.nexuscore.data.NexusData;
 import com.rollylindenshnizzer.nexuscore.data.RecipeJsonBuilder;
 import com.rollylindenshnizzer.nexuscore.debug.DebugRegistry;
-import com.rollylindenshnizzer.nexuscore.energy.EnergyStorage;
+import com.rollylindenshnizzer.nexuscore.energy.EnergyAccess;
+import com.rollylindenshnizzer.nexuscore.energy.NexusEnergyStorage;
 import com.rollylindenshnizzer.nexuscore.fluid.FluidStack;
-import com.rollylindenshnizzer.nexuscore.fluid.FluidTank;
+import com.rollylindenshnizzer.nexuscore.fluid.FluidAccess;
+import com.rollylindenshnizzer.nexuscore.fluid.NexusFluidTank;
+import com.rollylindenshnizzer.nexuscore.inventory.SimpleItemHandler;
 import com.rollylindenshnizzer.nexuscore.inventory.QuickMoveRouter;
 import com.rollylindenshnizzer.nexuscore.inventory.SlotRange;
+import com.rollylindenshnizzer.nexuscore.inventory.SlotRole;
 import com.rollylindenshnizzer.nexuscore.item.NexusItem;
 import com.rollylindenshnizzer.nexuscore.item.NexusItems;
+import com.rollylindenshnizzer.nexuscore.machine.MachineProcessingEngine;
+import com.rollylindenshnizzer.nexuscore.machine.MachineRecipeDefinition;
+import com.rollylindenshnizzer.nexuscore.machine.MachineState;
+import com.rollylindenshnizzer.nexuscore.machine.NexusMachineDefinition;
+import com.rollylindenshnizzer.nexuscore.machine.NexusMachines;
 import com.rollylindenshnizzer.nexuscore.network.NexusNetworking;
 import com.rollylindenshnizzer.nexuscore.performance.CooldownTracker;
 import com.rollylindenshnizzer.nexuscore.performance.ExpiringCache;
+import com.rollylindenshnizzer.nexuscore.registry.ContentModule;
+import com.rollylindenshnizzer.nexuscore.worldgen.NexusWorldgen;
 import com.rollylindenshnizzer.nexuscore.test.ValidationSuite;
 import com.rollylindenshnizzer.nexuscore.worldgen.OreFeatureJsonBuilder;
 import com.mojang.serialization.Codec;
 import dev.architectury.registry.registries.RegistrySupplier;
+import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -43,6 +55,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 
+import java.util.Collection;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +65,17 @@ public final class NexusCoreExampleContent extends NexusMod {
     private static final NexusCoreExampleContent INSTANCE = new NexusCoreExampleContent();
 
     private final ExampleConfig config = new ExampleConfig();
-    private final EnergyStorage energy = new EnergyStorage(10_000, 250, 250);
-    private final FluidTank tank = new FluidTank(4_000);
+    private final NexusEnergyStorage energy = NexusEnergyStorage.builder(10_000)
+            .io(250, 250)
+            .side(Direction.NORTH, EnergyAccess.INPUT)
+            .side(Direction.SOUTH, EnergyAccess.OUTPUT)
+            .build();
+    private final NexusFluidTank tank = NexusFluidTank.builder(4_000)
+            .side(Direction.NORTH, FluidAccess.INPUT)
+            .side(Direction.SOUTH, FluidAccess.OUTPUT)
+            .build();
+    private final SimpleItemHandler machineInventory = new SimpleItemHandler(4);
+    private final MachineState rubyPressState = new MachineState();
     private final CooldownTracker<String> cooldowns = new CooldownTracker<>();
     private final ExpiringCache<Integer> registeredItemCount = new ExpiringCache<>(Duration.ofMinutes(1), () -> 3);
     private RegistrySupplier<NexusItem> ruby;
@@ -63,6 +85,8 @@ public final class NexusCoreExampleContent extends NexusMod {
     private RegistrySupplier<Block> rubyOre;
     private RegistrySupplier<DataComponentType<String>> modeComponent;
     private NexusBlockSet sapphireSet;
+    private NexusMachineDefinition rubyPressDefinition;
+    private MachineRecipeDefinition rubyPressRecipe;
 
     private NexusCoreExampleContent() {
         super(MOD_ID);
@@ -73,7 +97,7 @@ public final class NexusCoreExampleContent extends NexusMod {
     }
 
     public static NexusData.DataPlan populateGeneratedData() {
-        return NexusData.plan(MOD_ID)
+        NexusData.DataPlan plan = NexusData.plan(MOD_ID)
                 .translation("itemGroup.nexuscore_example.main", "NexusCore Example")
                 .translation("tooltip.nexuscore_example.ruby", "Generated with NexusCore item helpers")
                 .translation("tooltip.nexuscore_example.raw_ruby", "Smelts into a ruby")
@@ -99,6 +123,8 @@ public final class NexusCoreExampleContent extends NexusMod {
                                 "advancements.nexuscore_example.root.description", "task", true, false, false)
                         .criterion("has_ruby", AdvancementJsonBuilder.inventoryChanged(MOD_ID + ":ruby"))
                         .build());
+        NexusCoreExampleSystems.populateGeneratedData(plan);
+        return plan;
     }
 
     @Override
@@ -169,7 +195,38 @@ public final class NexusCoreExampleContent extends NexusMod {
                 .generateTags()
                 .register();
 
+        rubyPressDefinition = NexusMachines.register(NexusMachines.machine(MOD_ID, "ruby_press")
+                .category("gem_processing")
+                .energy(10_000, 250, 250)
+                .fluid(4_000)
+                .slots("input", SlotRole.INPUT, 0, 1)
+                .slots("output", SlotRole.OUTPUT, 1, 2)
+                .slots("upgrades", SlotRole.UPGRADE, 2, 4)
+                .build());
+        rubyPressRecipe = MachineRecipeDefinition.builder(id("ruby_pressing"), id("ruby_press"))
+                .input(new ItemStack(Items.REDSTONE))
+                .fluidInput(new FluidStack(Fluids.WATER, 250))
+                .output(new ItemStack(Items.DIAMOND))
+                .energy(100)
+                .ticks(4)
+                .category("gem_processing")
+                .group("ruby")
+                .build();
+        NexusWorldgen.ore(MOD_ID, "ruby_ore")
+                .state(MOD_ID + ":ruby_ore")
+                .veinSize(6)
+                .count(8)
+                .heightRange(-32, 64)
+                .writeTo(NexusData.plan(MOD_ID));
+
+        NexusCoreExampleSystems.registerBeforeRegistries(tab, rubyOre);
+
         populateGeneratedData();
+    }
+
+    @Override
+    protected Collection<? extends ContentModule> modules() {
+        return NexusCoreExampleSystems.contentModules();
     }
 
     @Override
@@ -177,6 +234,7 @@ public final class NexusCoreExampleContent extends NexusMod {
         config.validateAll();
         energy.insert(config.machineEnergyCost.get(), false);
         tank.fill(new FluidStack(Fluids.WATER, 1_000), false);
+        machineInventory.set(0, new ItemStack(Items.REDSTONE));
         cooldowns.set("ruby_press", 0, 20);
 
         NexusDebugCommands.install(MOD_ID);
@@ -190,19 +248,17 @@ public final class NexusCoreExampleContent extends NexusMod {
                 .disconnectOnMismatch((client, server) -> "NexusCore example protocol mismatch: client " + client + ", server " + server);
         ConfigSchemaExporter.jsonSchema(config, "1.1");
 
-        /*
-         * Do not call RegistrySupplier#get() directly during mod construction /
-         * early initialization. On NeoForge, the deferred registry entries may
-         * not be present yet.
-         *
-         * The recipe viewer content creates ItemStacks from registered objects,
-         * so it is deferred until COMMON_SETUP.
-         */
         NexusLifecycle.on(NexusLifecycle.Phase.COMMON_SETUP, this::registerRecipeViewerContent);
 
         new QuickMoveRouter()
                 .route(new SlotRange(0, 1), new SlotRange(1, 37), stack -> true)
                 .route(new SlotRange(1, 37), new SlotRange(0, 1), stack -> true);
+
+        MachineProcessingEngine engine = new MachineProcessingEngine(rubyPressDefinition, machineInventory,
+                energy, tank, rubyPressState, new java.util.Random(1L));
+        for (int tick = 0; tick < rubyPressRecipe.processingTicks(); tick++) {
+            engine.tick(List.of(rubyPressRecipe), false);
+        }
 
         ValidationSuite.Result validation = new ValidationSuite()
                 .check("energy seeded", () -> {
@@ -215,6 +271,11 @@ public final class NexusCoreExampleContent extends NexusMod {
                         throw new AssertionError("Expected seeded example fluid");
                     }
                 })
+                .check("machine produced output", () -> {
+                    if (machineInventory.get(1).isEmpty()) {
+                        throw new AssertionError("Expected ruby press output");
+                    }
+                })
                 .run();
 
         DebugRegistry.section("nexuscore_example.items", () -> Integer.toString(registeredItemCount.get()));
@@ -222,7 +283,12 @@ public final class NexusCoreExampleContent extends NexusMod {
         DebugRegistry.section("nexuscore_example.block_set", () -> sapphireSet.blocks().keySet().toString());
         DebugRegistry.section("nexuscore_example.component", () -> MOD_ID + ":mode");
         DebugRegistry.section("nexuscore_example.energy_cost", () -> Integer.toString(config.machineEnergyCost.get()));
+        DebugRegistry.section("nexuscore_example.config_options", () -> config.options().keySet().toString());
+        DebugRegistry.section("nexuscore_example.machine", () -> rubyPressState.status() + " output=" + machineInventory.get(1).getCount());
         DebugRegistry.section("nexuscore_example.validation", () -> validation.passed() ? "passed" : validation.failures().toString());
+
+        NexusCoreExampleSystems.installRuntimeExamples(config, energy, tank, machineInventory,
+                rubyPressState, rubyPressDefinition, rubyPressRecipe, modeComponent);
     }
 
     private void registerRecipeViewerContent() {
@@ -258,6 +324,9 @@ public final class NexusCoreExampleContent extends NexusMod {
 
     private static final class ExampleConfig extends NexusConfig {
         private final com.rollylindenshnizzer.nexuscore.config.IntOption machineEnergyCost;
+        private final com.rollylindenshnizzer.nexuscore.config.BooleanOption enableParticles;
+        private final com.rollylindenshnizzer.nexuscore.config.StringOption workbenchLabel;
+        private final com.rollylindenshnizzer.nexuscore.config.EnumOption<NexusCoreExampleSystems.ExampleMode> balanceMode;
 
         private ExampleConfig() {
             super(MOD_ID);
@@ -268,6 +337,24 @@ public final class NexusCoreExampleContent extends NexusMod {
                     .translationKey("config.nexuscore_example.machine_energy_cost")
                     .serverSynced()
                     .requiresWorldReload();
+            enableParticles = booleanOption("enable_particles", true);
+            enableParticles
+                    .group("client")
+                    .comment("Controls optional client-side ruby particle descriptors in the example.")
+                    .translationKey("config.nexuscore_example.enable_particles");
+            workbenchLabel = stringOption("workbench_label", "Ruby Workbench").notBlank();
+            workbenchLabel
+                    .group("ui")
+                    .comment("Label used by the generated recipe viewer and UI examples.")
+                    .translationKey("config.nexuscore_example.workbench_label")
+                    .serverSynced();
+            balanceMode = enumOption("balance_mode", NexusCoreExampleSystems.ExampleMode.BALANCED,
+                    NexusCoreExampleSystems.ExampleMode.class);
+            balanceMode
+                    .group("machine")
+                    .comment("Demonstrates enum config options for machine balancing presets.")
+                    .translationKey("config.nexuscore_example.balance_mode")
+                    .serverSynced();
         }
     }
 }

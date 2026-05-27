@@ -10,12 +10,42 @@ import com.rollylindenshnizzer.nexuscore.config.NexusConfig;
 import com.rollylindenshnizzer.nexuscore.core.NexusIds;
 import com.rollylindenshnizzer.nexuscore.data.NexusData;
 import com.rollylindenshnizzer.nexuscore.data.NexusDataValidator;
+import com.rollylindenshnizzer.nexuscore.energy.EnergyAccess;
 import com.rollylindenshnizzer.nexuscore.energy.EnergyStorage;
+import com.rollylindenshnizzer.nexuscore.energy.NexusEnergyStorage;
+import com.rollylindenshnizzer.nexuscore.energy.NexusEnergyTransfer;
+import com.rollylindenshnizzer.nexuscore.entity.NexusEntityDefinitions;
+import com.rollylindenshnizzer.nexuscore.entity.ProjectileDefinition;
+import com.rollylindenshnizzer.nexuscore.fluid.FluidAccess;
+import com.rollylindenshnizzer.nexuscore.fluid.FluidStack;
+import com.rollylindenshnizzer.nexuscore.fluid.NexusFluidTank;
+import com.rollylindenshnizzer.nexuscore.fluid.NexusFluidTransfer;
+import com.rollylindenshnizzer.nexuscore.inventory.InventorySnapshot;
+import com.rollylindenshnizzer.nexuscore.inventory.InventoryTransfer;
+import com.rollylindenshnizzer.nexuscore.inventory.SimpleItemHandler;
+import com.rollylindenshnizzer.nexuscore.inventory.SlotRange;
+import com.rollylindenshnizzer.nexuscore.inventory.SlotRole;
+import com.rollylindenshnizzer.nexuscore.inventory.TransferRule;
+import com.rollylindenshnizzer.nexuscore.machine.MachineProcessResult;
+import com.rollylindenshnizzer.nexuscore.machine.MachineProcessingEngine;
+import com.rollylindenshnizzer.nexuscore.machine.MachineRecipeDefinition;
+import com.rollylindenshnizzer.nexuscore.machine.MachineState;
+import com.rollylindenshnizzer.nexuscore.machine.NexusMachineDefinition;
+import com.rollylindenshnizzer.nexuscore.machine.NexusMachines;
 import com.rollylindenshnizzer.nexuscore.network.NexusNetworking;
 import com.rollylindenshnizzer.nexuscore.performance.NexusBenchmarks;
+import com.rollylindenshnizzer.nexuscore.resource.DataDrivenRegistry;
+import com.rollylindenshnizzer.nexuscore.resource.JsonSchema;
+import com.rollylindenshnizzer.nexuscore.resource.TypedDataLoader;
+import com.rollylindenshnizzer.nexuscore.worldgen.NexusWorldgen;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.material.Fluids;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class NexusCoreGameTestScenarios {
@@ -97,6 +127,112 @@ public final class NexusCoreGameTestScenarios {
         var results = NexusBenchmarks.smokeSuite().run();
         assertTrue(results.size() >= 2, "Smoke benchmark suite should run multiple benchmarks");
         assertTrue(results.stream().allMatch(result -> result.iterations() > 0), "Benchmarks should report iterations");
+    }
+
+    public static void machineFrameworkProcessesHybridRecipes() {
+        NexusMachineDefinition definition = NexusMachines.register(NexusMachines.machine("nexuscore", "gametest_press")
+                .category("press")
+                .energy(10_000, 250, 250)
+                .fluid(4_000)
+                .slots("input", SlotRole.INPUT, 0, 1)
+                .slots("output", SlotRole.OUTPUT, 1, 2)
+                .build());
+        SimpleItemHandler inventory = new SimpleItemHandler(2);
+        inventory.set(0, new ItemStack(Items.RAW_IRON, 1));
+        NexusEnergyStorage energy = new NexusEnergyStorage(10_000, 250, 250);
+        energy.insert(1_000, false);
+        NexusFluidTank fluid = new NexusFluidTank(4_000);
+        fluid.fill(new FluidStack(Fluids.WATER, 1_000), false);
+        MachineRecipeDefinition recipe = MachineRecipeDefinition.builder(
+                        NexusIds.id("nexuscore", "gametest_press_recipe"),
+                        NexusIds.id("nexuscore", "pressing"))
+                .input(new ItemStack(Items.RAW_IRON))
+                .fluidInput(new FluidStack(Fluids.WATER, 250))
+                .output(new ItemStack(Items.IRON_INGOT))
+                .energy(100)
+                .ticks(2)
+                .build();
+        MachineProcessingEngine engine = new MachineProcessingEngine(definition, inventory, energy, fluid, new MachineState(), new java.util.Random(1L));
+
+        MachineProcessResult first = engine.tick(List.of(recipe), false);
+        MachineProcessResult second = engine.tick(List.of(recipe), false);
+
+        assertTrue(first.progressed(), "Machine should progress on first tick");
+        assertTrue(second.completed(), "Machine should complete recipe on second tick");
+        assertTrue(inventory.get(0).isEmpty(), "Input should be consumed");
+        assertEquals(1, inventory.get(1).getCount(), "Output should be inserted");
+        assertEquals(750, fluid.stored().amount(), "Fluid cost should be drained");
+    }
+
+    public static void inventoryTransferRulesTraceRoutes() {
+        SimpleItemHandler inventory = new SimpleItemHandler(3);
+        inventory.set(0, new ItemStack(Items.COPPER_INGOT, 8));
+        TransferRule rule = TransferRule.builder("input-to-output", new SlotRange(0, 1), new SlotRange(1, 3))
+                .player(true)
+                .automation(false)
+                .build();
+        InventorySnapshot before = InventorySnapshot.capture(inventory);
+        var result = InventoryTransfer.route(inventory, 0, TransferRule.TransferActor.PLAYER, List.of(rule), false);
+        InventorySnapshot after = InventorySnapshot.capture(inventory);
+
+        assertEquals(8, result.moved(), "Transfer should move the whole stack");
+        assertTrue(after.diff(before).size() >= 2, "Inventory diff should report changed source and target slots");
+        assertTrue(result.trace().stream().anyMatch(line -> line.contains("input-to-output")), "Transfer trace should name the route");
+    }
+
+    public static void energyAndFluidTransfersRespectSides() {
+        NexusEnergyStorage source = NexusEnergyStorage.builder(1_000).io(1_000, 1_000)
+                .side(Direction.EAST, EnergyAccess.OUTPUT)
+                .build();
+        NexusEnergyStorage target = NexusEnergyStorage.builder(1_000).io(1_000, 1_000)
+                .side(Direction.WEST, EnergyAccess.INPUT)
+                .build();
+        source.insert(500, false);
+        var energyResult = NexusEnergyTransfer.move(source, Direction.EAST, target, Direction.WEST, 200, false);
+        assertEquals(200, energyResult.moved(), "Side-aware energy transfer should move allowed energy");
+
+        NexusFluidTank fluidSource = NexusFluidTank.builder(1_000).side(Direction.EAST, FluidAccess.OUTPUT).build();
+        NexusFluidTank fluidTarget = NexusFluidTank.builder(1_000).side(Direction.WEST, FluidAccess.INPUT).build();
+        fluidSource.fill(new FluidStack(Fluids.WATER, 500), false);
+        var fluidResult = NexusFluidTransfer.move(fluidSource, Direction.EAST, fluidTarget, Direction.WEST, 250, false);
+        assertEquals(250, fluidResult.moved().amount(), "Side-aware fluid transfer should move allowed fluid");
+    }
+
+    public static void worldgenAndEntityDefinitionsGenerateDescriptors() {
+        var ore = NexusWorldgen.ore("nexuscore", "gametest_ore")
+                .state("minecraft:diamond_ore")
+                .veinSize(5)
+                .count(3)
+                .heightRange(-16, 32);
+        assertTrue(ore.configuredFeature().toString().contains("minecraft:ore"), "Ore builder should emit a configured feature");
+        assertTrue(ore.placedFeature().toString().contains("height_range"), "Ore builder should emit placement modifiers");
+
+        var projectile = NexusEntityDefinitions.register(NexusEntityDefinitions.projectile("nexuscore", "gametest_bolt")
+                .sized(0.25F, 0.25F)
+                .projectile(ProjectileDefinition.simple(4.0, 1.6F))
+                .spawnEgg(0x3355FF, 0xFFFFFF)
+                .build());
+        assertTrue(projectile.projectile() != null, "Projectile definition should keep projectile settings");
+        assertTrue(NexusEntityDefinitions.definitions().contains(projectile), "Entity definition registry should retain the descriptor");
+    }
+
+    public static void typedDataLoaderValidatesDatapackJson() {
+        TypedDataLoader<String> loader = new TypedDataLoader<>("machines",
+                new JsonSchema().require("type", JsonSchema.Type.STRING).require("energy", JsonSchema.Type.NUMBER),
+                json -> json.get("type").getAsString() + ":" + json.get("energy").getAsInt());
+        DataDrivenRegistry<String> registry = new DataDrivenRegistry<>(loader);
+        JsonObject valid = new JsonObject();
+        valid.addProperty("type", "nexuscore:pressing");
+        valid.addProperty("energy", 100);
+        JsonObject invalid = new JsonObject();
+        invalid.addProperty("type", "nexuscore:pressing");
+
+        var report = registry.reload(Map.of(
+                ResourceLocation.fromNamespaceAndPath("nexuscore", "valid"), valid,
+                ResourceLocation.fromNamespaceAndPath("nexuscore", "invalid"), invalid));
+
+        assertFalse(report.passed(), "Invalid datapack JSON should be reported");
+        assertTrue(registry.get(ResourceLocation.fromNamespaceAndPath("nexuscore", "valid")).isPresent(), "Valid datapack JSON should load");
     }
 
     private static void assertTrue(boolean condition, String message) {

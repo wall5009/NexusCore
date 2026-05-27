@@ -76,6 +76,20 @@
     {
       "type": "data",
       "group": "generated",
+      "id": "neoforge/biome_modifier/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "neoforge/biome_modifier/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
       "id": "recipe/ruby_block.json",
       "owner": "datagen",
       "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
@@ -133,6 +147,34 @@
       "type": "data",
       "group": "generated",
       "id": "worldgen/configured_feature/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "worldgen/configured_feature/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "worldgen/configured_feature/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "worldgen/placed_feature/ruby_ore.json",
+      "owner": "datagen",
+      "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
+    },
+    {
+      "type": "data",
+      "group": "generated",
+      "id": "worldgen/placed_feature/ruby_ore.json",
       "owner": "datagen",
       "source": "com.rollylindenshnizzer.nexuscore.data.NexusData$DataPlan:125"
     },

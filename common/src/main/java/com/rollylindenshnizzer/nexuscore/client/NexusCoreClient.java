@@ -27,6 +27,7 @@ public final class NexusCoreClient {
         profilerHudKey = new KeyMapping("key.nexuscore.profiler_hud", InputConstants.KEY_F10, "key.categories.nexuscore");
         KeyMappingRegistry.register(debugScreenKey);
         KeyMappingRegistry.register(profilerHudKey);
+        ClientEffectRuntime.install();
 
         ClientLifecycleEvent.CLIENT_SETUP.register(client -> NexusLifecycle.fire(NexusLifecycle.Phase.CLIENT_INIT));
         ClientTickEvent.CLIENT_POST.register(client -> {

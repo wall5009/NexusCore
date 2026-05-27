@@ -130,6 +130,10 @@ public final class NexusData {
             return Map.copyOf(translations);
         }
 
+        public String modId() {
+            return modId;
+        }
+
         public Map<String, JsonObject> assets() {
             return Map.copyOf(assets);
         }

@@ -1,7 +1,9 @@
 package com.rollylindenshnizzer.nexuscore.machine;
 
 import com.rollylindenshnizzer.nexuscore.energy.EnergyStorage;
+import com.rollylindenshnizzer.nexuscore.energy.NexusEnergyStorage;
 import com.rollylindenshnizzer.nexuscore.fluid.FluidTank;
+import com.rollylindenshnizzer.nexuscore.fluid.NexusFluidTank;
 import com.rollylindenshnizzer.nexuscore.inventory.SimpleItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -12,15 +14,15 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class BaseMachineBlockEntity extends BlockEntity {
     protected final MachineState machineState = new MachineState();
-    protected final EnergyStorage energy;
-    protected final FluidTank fluidTank;
+    protected final NexusEnergyStorage energy;
+    protected final NexusFluidTank fluidTank;
     protected final SimpleItemHandler inventory;
 
     protected BaseMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state,
                                      long energyCapacity, long fluidCapacity, int inventorySize) {
         super(type, pos, state);
-        this.energy = new EnergyStorage(energyCapacity);
-        this.fluidTank = new FluidTank(fluidCapacity);
+        this.energy = new NexusEnergyStorage(energyCapacity);
+        this.fluidTank = new NexusFluidTank(fluidCapacity);
         this.inventory = new SimpleItemHandler(inventorySize);
     }
 
@@ -33,6 +35,14 @@ public abstract class BaseMachineBlockEntity extends BlockEntity {
     }
 
     public FluidTank fluidTank() {
+        return fluidTank;
+    }
+
+    public NexusEnergyStorage nexusEnergy() {
+        return energy;
+    }
+
+    public NexusFluidTank nexusFluidTank() {
         return fluidTank;
     }
 

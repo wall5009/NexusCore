@@ -1,75 +1,132 @@
 # Getting Started
 
-NexusCore is an Architectury library for Minecraft 1.21.1. The public API lives in `common`, while `fabric` and `neoforge` provide loader entrypoints, metadata, optional compatibility plugins, datagen providers, GameTest registration, and transfer/capability bridges.
+NexusCore is a Minecraft 1.21.1 Architectury library mod for Fabric and NeoForge. It provides common registration builders, datagen, config, diagnostics, networking helpers, machines, transfer abstractions, recipe viewer integration, client descriptors, testing helpers, and build tooling.
 
-## Add NexusCore To A Mod
+For a complete package-by-package map, read `docs/system-catalog.md`. For a working dual-loader reference mod, read `examples/example-mod/README.md` and `docs/example-mod-walkthrough.md`.
 
-Depend on the loader jar at runtime and compile against the common API. In a multi-loader Architectury mod, your shared module should use NexusCore common classes and each loader module should depend on the matching NexusCore loader jar.
+## Project Shape
 
-The required runtime dependencies are:
+A typical NexusCore consumer has three source sets:
 
-- Architectury API.
-- owo-lib.
-- Fabric API on Fabric.
-- NeoForge on NeoForge.
+```text
+my-mod/
+  common/   shared content, config, datagen plans, machines, packets, descriptors
+  fabric/   Fabric entrypoint, Fabric-only bridges, Fabric datagen
+  neoforge/ NeoForge @Mod entrypoint, NeoForge-only bridges, NeoForge datagen
+```
 
-Optional integrations are declared as optional metadata dependencies and compile-only Gradle dependencies in NexusCore itself:
+The common module should own most mod logic. Loader modules should stay thin unless a loader API is genuinely different.
 
-- JEI.
-- EMI.
-- REI.
-- Team Reborn Energy API on Fabric.
+## Dependencies
 
-## Bootstrap A Mod
+Use NexusCore as a mod dependency on both loaders and keep Architectury, owo-lib, Minecraft, and Java versions aligned with the version catalog used by NexusCore.
 
-Use `NexusMod` when you want a predictable initialization flow:
+Optional integrations are intentionally optional:
+
+- JEI, EMI, and REI are optional recipe viewer integrations.
+- Team Reborn Energy is the Fabric energy bridge.
+- Fabric Transfer is the Fabric item/fluid transfer bridge.
+- NeoForge capabilities are used for NeoForge energy/fluid/item exposure.
+- owo-lib is required by NexusCore's generated client screens.
+
+## Bootstrap
+
+The smallest common bootstrap uses `NexusMod`:
 
 ```java
 public final class ExampleContent extends NexusMod {
     public static final String MOD_ID = "example";
+    private static final ExampleContent INSTANCE = new ExampleContent();
 
-    public ExampleContent() {
+    private ExampleContent() {
         super(MOD_ID);
+    }
+
+    public static void bootstrap() {
+        INSTANCE.init();
     }
 
     @Override
     protected void beforeRegistries() {
-        NexusItems.item(MOD_ID, "ruby")
-                .modelGenerated()
-                .register();
+        // Registry declarations go here.
     }
 
     @Override
     protected void onInitialize() {
-        logger().info("Example initialized");
+        // Runtime setup, validation, commands, packets, and debug sections go here.
     }
 }
 ```
 
-Call it from each loader:
+Fabric entrypoint:
 
 ```java
-NexusCore.init();
-new ExampleContent().init();
+public final class ExampleFabric implements ModInitializer {
+    @Override
+    public void onInitialize() {
+        NexusCore.init();
+        ExampleContent.bootstrap();
+    }
+}
 ```
 
-`beforeRegistries()` is for content declarations. `onInitialize()` is for commands, networking, config validation, debug sections, and compatibility descriptors.
+NeoForge entrypoint:
 
-## Use The Example Mod
-
-The example is a full dual-loader sample:
-
-- `examples/example-mod/common` contains shared content and datagen declarations.
-- `examples/example-mod/fabric` contains the Fabric entrypoint and Fabric datagen entrypoint.
-- `examples/example-mod/neoforge` contains the NeoForge `@Mod` entrypoint and NeoForge datagen listener.
-
-Build everything:
-
-```powershell
-.\gradlew.bat build
+```java
+@Mod(ExampleContent.MOD_ID)
+public final class ExampleNeoForge {
+    public ExampleNeoForge(IEventBus modBus) {
+        NexusCore.init();
+        ExampleContent.bootstrap();
+    }
+}
 ```
 
-Run datagen:
+## Registration Pattern
+
+Declare content before the registry group is registered:
+
+```java
+RegistrySupplier<CreativeModeTab> tab = NexusItems.creativeTab(MOD_ID, "main")
+        .icon(() -> new ItemStack(Items.DIAMOND))
+        .register();
+
+RegistrySupplier<NexusItem> ruby = NexusItems.item(MOD_ID, "ruby")
+        .creativeTab(tab)
+        .tooltip("tooltip.example.ruby")
+        .modelGenerated()
+        .register();
+
+RegistrySupplier<Block> rubyOre = NexusBlocks.block(MOD_ID, "ruby_ore")
+        .strength(3.0F, 3.0F)
+        .requiresCorrectTool()
+        .withBlockItem()
+        .simpleCubeModel()
+        .dropsSelf()
+        .mineableWithPickaxe()
+        .needsIronTool()
+        .register();
+```
+
+`NexusMod` calls `NexusRegistries.group(modId).registerAll()` after `beforeRegistries` and content module initialization.
+
+## Datagen
+
+Create one common plan and consume it from both loaders:
+
+```java
+public static NexusData.DataPlan populateGeneratedData() {
+    return NexusData.plan(MOD_ID)
+            .translation("item.example.ruby", "Ruby")
+            .data("recipe/ruby_from_smelting.json",
+                    RecipeJsonBuilder.cooking("minecraft:smelting", "misc",
+                            "example:raw_ruby", "example:ruby", 0.7F, 200).build());
+}
+```
+
+Fabric uses `FabricDataGenerator.Pack.addProvider`. NeoForge uses `GatherDataEvent.addProvider`. The example mod shows both.
+
+Run:
 
 ```powershell
 .\gradlew.bat :fabric:runDatagen
@@ -78,9 +135,43 @@ Run datagen:
 .\gradlew.bat :example-neoforge:runDatagen
 ```
 
-Run GameTests:
+## First Systems To Add
+
+Most mods start with this sequence:
+
+1. Register a creative tab, items, and blocks.
+2. Add translations, models, blockstates, tags, loot, and recipes through `NexusData`.
+3. Define `NexusConfig` options and call `validateAll`.
+4. Install a debug command and at least one `DebugRegistry.section`.
+5. Add a `ValidationSuite` for content invariants.
+6. Add recipe viewer categories/displays if the content introduces custom processing.
+7. Add machines, transfer, worldgen, entities, or client descriptors as needed.
+
+## Validation Commands
+
+From the repository root:
 
 ```powershell
+.\gradlew.bat build
+.\gradlew.bat runNexusValidation
 .\gradlew.bat :fabric:runGametest
 .\gradlew.bat :neoforge:runGametest
 ```
+
+For release compatibility:
+
+```powershell
+.\gradlew.bat checkBinaryCompatibility -PnexusApiBaseline=common/build/libs/nexuscore-common-1.0.0-build.3.jar -PnexusRelease=true
+```
+
+## Where To Go Next
+
+- `docs/system-catalog.md`: every package and subsystem.
+- `docs/example-mod-walkthrough.md`: the example mod in detail.
+- `docs/registry-guide.md`: registries and content modules.
+- `docs/item-block-guide.md`: content builders.
+- `docs/config-guide.md`: typed config and generated screens.
+- `docs/datagen-guide.md`: generated resources and validation.
+- `docs/machine-guide.md`: machines, inventory, energy, fluids, and UI bindings.
+- `docs/compatibility-guide.md`: JEI, EMI, REI, owo-lib, Fabric, and NeoForge compatibility.
+- `docs/testing-guide.md`: validation suites, GameTests, ABI checks, and CI gates.

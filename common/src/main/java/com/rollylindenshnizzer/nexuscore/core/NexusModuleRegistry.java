@@ -15,6 +15,21 @@ public final class NexusModuleRegistry {
         register(new NexusModuleMetadata("nexus-core", NexusVersion.VERSION, List.of("fabric", "neoforge"),
                 List.of("architectury", "owo"), List.of("jei", "emi", "roughlyenoughitems"),
                 "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-machine", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core"), List.of("jei", "emi", "roughlyenoughitems"),
+                "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-transfer", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core"), List.of("teamreborn-energy"),
+                "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-worldgen", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core"), List.of(),
+                "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-entity", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core"), List.of(),
+                "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-resource", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core"), List.of(),
+                "[1.21.1,1.22)", "stable"));
     }
 
     public static void register(NexusModuleMetadata metadata) {

@@ -40,6 +40,31 @@ public final class NexusCoreNeoForgeGameTests {
         run(helper, NexusCoreGameTestScenarios::benchmarkSuiteRecordsProfilerSamples);
     }
 
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "bootstrap", timeoutTicks = 100)
+    public static void machineFrameworkProcessesHybridRecipes(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::machineFrameworkProcessesHybridRecipes);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "bootstrap", timeoutTicks = 100)
+    public static void inventoryTransferRulesTraceRoutes(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::inventoryTransferRulesTraceRoutes);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "bootstrap", timeoutTicks = 100)
+    public static void energyAndFluidTransfersRespectSides(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::energyAndFluidTransfersRespectSides);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "bootstrap", timeoutTicks = 100)
+    public static void worldgenAndEntityDefinitionsGenerateDescriptors(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::worldgenAndEntityDefinitionsGenerateDescriptors);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "bootstrap", timeoutTicks = 100)
+    public static void typedDataLoaderValidatesDatapackJson(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::typedDataLoaderValidatesDatapackJson);
+    }
+
     private static void run(GameTestHelper helper, Runnable scenario) {
         scenario.run();
         helper.succeed();

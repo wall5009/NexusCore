@@ -16,7 +16,7 @@ ext.modName = 'NexusCore'
 ext.modDescription = 'Cross-loader helpers, builders, diagnostics, and utilities for Minecraft modding.'
 ext.modAuthor = 'rollylindenshnizzer'
 ext.modLicense = 'ARR'
-ext.modVersion = '1.1.0-build.2'
+ext.modVersion = '1.2.0-build.2'
 ext.mavenGroup = 'com.rollylindenshnizzer'
 ext.archivesBaseName = 'nexuscore'
 ext.jeiVersion = '19.27.0.340'
@@ -42,6 +42,15 @@ allprojects {
         maven { url = 'https://maven.terraformersmc.com/releases/' }
         maven { url = 'https://maven.shedaniel.me/' }
         mavenCentral()
+    }
+
+    configurations.configureEach {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'dev.architectury' && details.requested.name == 'architectury-transformer') {
+                details.useVersion '5.2.91'
+                details.because '5.2.91 fixes the post-success TransformerRuntime.removeDuplicates shutdown trace seen in GameTest runs.'
+            }
+        }
     }
 }
 
@@ -75,7 +84,7 @@ subprojects {
 
     processResources {
         def resourceProperties = [
-                version: '1.1.0-build.2',
+                version: '1.2.0-build.2',
                 mod_id: 'nexuscore',
                 mod_name: 'NexusCore',
                 mod_description: 'Cross-loader helpers, builders, diagnostics, and utilities for Minecraft modding.',
@@ -212,6 +221,7 @@ tasks.register('generateDocsSite') {
         outDir.mkdirs()
 
         def versions = [
+                'v1.2': file('docs/v1.2'),
                 'v1.1': file('docs/v1.1'),
                 'v1.0': file('docs')
         ].findAll { it.value.exists() }
@@ -320,7 +330,7 @@ tasks.register('generateDocsSite') {
         new File(outDir, 'index.html').text = """<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>NexusCore Docs</title><link rel="stylesheet" href="site.css"></head>
-<body><header><span class="brand">NexusCore Docs</span><select id="version-switcher"><option value="v1.1">v1.1</option><option value="v1.0">v1.0</option></select><input id="search" type="search" placeholder="Search docs"></header><main><article><h1>NexusCore Documentation</h1><p>Select a version or search the complete docs index.</p></article><aside id="search-results"></aside></main><script src="search-index.js"></script><script src="site.js"></script></body>
+<body><header><span class="brand">NexusCore Docs</span><select id="version-switcher"><option value="v1.2">v1.2</option><option value="v1.1">v1.1</option><option value="v1.0">v1.0</option></select><input id="search" type="search" placeholder="Search docs"></header><main><article><h1>NexusCore Documentation</h1><p>Select a version or search the complete docs index.</p></article><aside id="search-results"></aside></main><script src="search-index.js"></script><script src="site.js"></script></body>
 </html>
 """
         new File(outDir, 'search-index.js').text = "window.NEXUS_DOCS_SEARCH = ${groovy.json.JsonOutput.toJson(searchEntries)};\n"
@@ -397,6 +407,7 @@ tasks.register('generateReleaseMetadata') {
 | JEI | ${jeiVersion} |
 | EMI | ${emiVersion} |
 | REI | ${reiVersion} |
+| Team Reborn Energy API | ${teamRebornEnergyVersion} |
 """
         new File(dir, 'loader-matrix.md').text = '# Loader Support\n\n| Loader | Supported |\n| --- | --- |\n| Fabric | yes |\n| NeoForge | yes |\n'
         new File(dir, 'release-checklist.md').text = """# Release Checklist
@@ -405,11 +416,11 @@ tasks.register('generateReleaseMetadata') {
 - Run `build runNexusValidation generateReleaseMetadata`.
 - Run `:fabric:runGametest` and `:neoforge:runGametest`.
 - Review `build/reports/nexus/docs-site/index.html`.
-- Confirm any post-success Architectury Transformer trace appears only after `BUILD SUCCESSFUL` and passed GameTest summaries.
+- Confirm Fabric and NeoForge GameTest logs finish without Architectury Transformer shutdown traces.
 """
         new File(dir, 'known-issues.md').text = """# Known Release Notes
 
-Architectury Runtime may print a non-fatal `StringIndexOutOfBoundsException` from `TransformerRuntime.removeDuplicates` after successful GameTest shutdown. Treat it as non-fatal only when Gradle exits successfully and all required GameTests pass.
+Architectury Transformer is pinned to 5.2.91 because older 5.2.87 runtimes could print a post-success `StringIndexOutOfBoundsException` from `TransformerRuntime.removeDuplicates` after GameTest shutdown.
 """
     }
 }

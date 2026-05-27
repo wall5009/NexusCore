@@ -22,6 +22,15 @@ public final class NexusCoreGradlePlugin implements Plugin<Project> {
         registerScaffold(project, "nexusCreateScreen", "screen");
         registerScaffold(project, "nexusCreateGameTest", "gametest");
         registerScaffold(project, "nexusCreateCompatModule", "compat");
+        registerScaffold(project, "nexusCreateMachine", "machine");
+        registerScaffold(project, "nexusCreateMachineRecipe", "machine_recipe");
+        registerScaffold(project, "nexusCreateEnergyStorage", "energy_storage");
+        registerScaffold(project, "nexusCreateFluidTank", "fluid_tank");
+        registerScaffold(project, "nexusCreateWorldgenFeature", "worldgen_feature");
+        registerScaffold(project, "nexusCreateOreFeature", "ore_feature");
+        registerScaffold(project, "nexusCreateEntity", "entity");
+        registerScaffold(project, "nexusCreateProjectile", "projectile");
+        registerScaffold(project, "nexusCreateDatapackLoader", "datapack_loader");
 
         project.getTasks().register("nexusSetupProject", task -> {
             task.setGroup("nexus");
@@ -55,10 +64,9 @@ public final class NexusCoreGradlePlugin implements Plugin<Project> {
                 }
                 boolean dryRun = Boolean.parseBoolean(String.valueOf(project.findProperty("nexusDryRun")));
                 Path file = project.getProjectDir().toPath().resolve("common/src/main/java/generated/" + kind + "/" + toClassName(name) + ".java");
-                String content = "package generated." + kind.replace('-', '_') + ";\n\n"
-                        + "public final class " + toClassName(name) + " {\n"
-                        + "    // TODO: Fill in NexusCore " + kind + " behavior.\n"
-                        + "}\n";
+                String className = toClassName(name);
+                String modId = propertyValue(project, "nexusModId", "examplemod");
+                String content = scaffoldContent(kind, className, modId, name);
                 if (dryRun) {
                     project.getLogger().lifecycle("Would write {}", file);
                     project.getLogger().lifecycle(content);
@@ -83,6 +91,178 @@ public final class NexusCoreGradlePlugin implements Plugin<Project> {
         } catch (IOException exception) {
             throw new RuntimeException("Failed to create " + relative, exception);
         }
+    }
+
+    private static String propertyValue(Project project, String name, String fallback) {
+        Object value = project.findProperty(name);
+        if (value == null || value.toString().isBlank() || value.toString().equals("null")) {
+            return fallback;
+        }
+        return value.toString();
+    }
+
+    private static String scaffoldContent(String kind, String className, String modId, String path) {
+        String packageName = "generated." + kind.replace('-', '_');
+        String normalizedPath = path.replace('/', '_').replace('-', '_');
+        return switch (kind) {
+            case "machine" -> """
+                    package %s;
+
+                    import com.rollylindenshnizzer.nexuscore.inventory.SlotRole;
+                    import com.rollylindenshnizzer.nexuscore.machine.NexusMachineDefinition;
+                    import com.rollylindenshnizzer.nexuscore.machine.NexusMachines;
+
+                    public final class %s {
+                        public static final NexusMachineDefinition DEFINITION = NexusMachines.register(NexusMachines.machine("%s", "%s")
+                                .category("processor")
+                                .energy(10000, 250, 250)
+                                .fluid(4000)
+                                .slots("input", SlotRole.INPUT, 0, 1)
+                                .slots("output", SlotRole.OUTPUT, 1, 2)
+                                .slots("upgrades", SlotRole.UPGRADE, 2, 4)
+                                .build());
+
+                        private %s() {
+                        }
+                    }
+                    """.formatted(packageName, className, modId, normalizedPath, className);
+            case "machine_recipe" -> """
+                    package %s;
+
+                    import com.rollylindenshnizzer.nexuscore.core.NexusIds;
+                    import com.rollylindenshnizzer.nexuscore.machine.MachineRecipeDefinition;
+                    import net.minecraft.world.item.ItemStack;
+                    import net.minecraft.world.item.Items;
+
+                    public final class %s {
+                        public static final MachineRecipeDefinition RECIPE = MachineRecipeDefinition.builder(
+                                        NexusIds.id("%s", "%s"),
+                                        NexusIds.id("%s", "processing"))
+                                .input(new ItemStack(Items.IRON_INGOT))
+                                .output(new ItemStack(Items.GOLD_INGOT))
+                                .energy(100)
+                                .ticks(100)
+                                .build();
+
+                        private %s() {
+                        }
+                    }
+                    """.formatted(packageName, className, modId, normalizedPath, modId, className);
+            case "energy_storage" -> """
+                    package %s;
+
+                    import com.rollylindenshnizzer.nexuscore.energy.EnergyAccess;
+                    import com.rollylindenshnizzer.nexuscore.energy.NexusEnergyStorage;
+                    import net.minecraft.core.Direction;
+
+                    public final class %s {
+                        public static NexusEnergyStorage create() {
+                            return NexusEnergyStorage.builder(10000)
+                                    .io(250, 250)
+                                    .side(Direction.NORTH, EnergyAccess.INPUT)
+                                    .side(Direction.SOUTH, EnergyAccess.OUTPUT)
+                                    .build();
+                        }
+                    }
+                    """.formatted(packageName, className);
+            case "fluid_tank" -> """
+                    package %s;
+
+                    import com.rollylindenshnizzer.nexuscore.fluid.FluidAccess;
+                    import com.rollylindenshnizzer.nexuscore.fluid.NexusFluidTank;
+                    import net.minecraft.core.Direction;
+                    import net.minecraft.world.level.material.Fluids;
+
+                    public final class %s {
+                        public static NexusFluidTank create() {
+                            return NexusFluidTank.builder(4000)
+                                    .filter(fluid -> fluid == Fluids.WATER)
+                                    .side(Direction.NORTH, FluidAccess.INPUT)
+                                    .side(Direction.SOUTH, FluidAccess.OUTPUT)
+                                    .build();
+                        }
+                    }
+                    """.formatted(packageName, className);
+            case "worldgen_feature", "ore_feature" -> """
+                    package %s;
+
+                    import com.rollylindenshnizzer.nexuscore.data.NexusData;
+                    import com.rollylindenshnizzer.nexuscore.worldgen.NexusWorldgen;
+
+                    public final class %s {
+                        public static NexusData.DataPlan generate(NexusData.DataPlan plan) {
+                            return NexusWorldgen.ore("%s", "%s")
+                                    .state("%s:%s")
+                                    .veinSize(6)
+                                    .count(8)
+                                    .heightRange(-32, 48)
+                                    .writeTo(plan);
+                        }
+                    }
+                    """.formatted(packageName, className, modId, normalizedPath, modId, normalizedPath);
+            case "entity" -> """
+                    package %s;
+
+                    import com.rollylindenshnizzer.nexuscore.entity.NexusEntityDefinition;
+                    import com.rollylindenshnizzer.nexuscore.entity.NexusEntityDefinitions;
+                    import com.rollylindenshnizzer.nexuscore.entity.RegisteredNexusEntity;
+                    import net.minecraft.world.entity.EntityType;
+                    import net.minecraft.world.entity.Mob;
+                    import net.minecraft.world.entity.MobCategory;
+
+                    public final class %s {
+                        public static final NexusEntityDefinition DEFINITION = NexusEntityDefinitions.entity("%s", "%s", MobCategory.CREATURE)
+                                .sized(0.6F, 1.8F)
+                                .tracking(64, 3)
+                                .attribute("minecraft:generic.max_health", 20.0)
+                                .spawnEgg(0x55AA55, 0xFFFFFF)
+                                .build();
+
+                        public static <T extends Mob> RegisteredNexusEntity<T> register(EntityType.EntityFactory<T> factory) {
+                            return NexusEntityDefinitions.registerMobType(DEFINITION, factory);
+                        }
+                    }
+                    """.formatted(packageName, className, modId, normalizedPath);
+            case "projectile" -> """
+                    package %s;
+
+                    import com.rollylindenshnizzer.nexuscore.entity.NexusEntityDefinition;
+                    import com.rollylindenshnizzer.nexuscore.entity.NexusEntityDefinitions;
+                    import com.rollylindenshnizzer.nexuscore.entity.ProjectileDefinition;
+                    import com.rollylindenshnizzer.nexuscore.entity.RegisteredNexusEntity;
+                    import net.minecraft.world.entity.Entity;
+                    import net.minecraft.world.entity.EntityType;
+
+                    public final class %s {
+                        public static final NexusEntityDefinition DEFINITION = NexusEntityDefinitions.projectile("%s", "%s")
+                                .sized(0.25F, 0.25F)
+                                .projectile(ProjectileDefinition.simple(4.0, 1.6F))
+                                .build();
+
+                        public static <T extends Entity> RegisteredNexusEntity<T> register(EntityType.EntityFactory<T> factory) {
+                            return NexusEntityDefinitions.registerType(DEFINITION, factory);
+                        }
+                    }
+                    """.formatted(packageName, className, modId, normalizedPath);
+            case "datapack_loader" -> """
+                    package %s;
+
+                    import com.rollylindenshnizzer.nexuscore.resource.DataDrivenRegistry;
+                    import com.rollylindenshnizzer.nexuscore.resource.JsonSchema;
+                    import com.rollylindenshnizzer.nexuscore.resource.TypedDataLoader;
+
+                    public final class %s {
+                        public static final DataDrivenRegistry<String> REGISTRY = new DataDrivenRegistry<>(
+                                new TypedDataLoader<>("machine_profiles",
+                                        new JsonSchema().require("type", JsonSchema.Type.STRING),
+                                        json -> json.get("type").getAsString()));
+                    }
+                    """.formatted(packageName, className);
+            default -> "package " + packageName + ";\n\n"
+                    + "public final class " + className + " {\n"
+                    + "    public static final String ID = \"" + modId + ":" + normalizedPath + "\";\n"
+                    + "}\n";
+        };
     }
 
     private static String toClassName(String value) {

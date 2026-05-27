@@ -26,6 +26,8 @@ final class NexusCoreGradlePluginFunctionalTest {
 
         assertTrue(result.getOutput().contains("runNexusValidation"));
         assertTrue(result.getOutput().contains("nexusCreateItem"));
+        assertTrue(result.getOutput().contains("nexusCreateMachine"));
+        assertTrue(result.getOutput().contains("nexusCreateDatapackLoader"));
         assertTrue(result.getOutput().contains("nexusSetupProject"));
     }
 
@@ -64,6 +66,20 @@ final class NexusCoreGradlePluginFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":nexusCreateBlock").getOutcome());
         assertFalse(Files.exists(projectDir.resolve("common/src/main/java/generated/block/RubyBlock.java")));
         assertTrue(result.getOutput().contains("Would write"));
+    }
+
+    @Test
+    void machineScaffoldWritesConcreteNexusCoreApiUsage() throws IOException {
+        writeBuildFile();
+
+        BuildResult result = gradle("nexusCreateMachine", "-PnexusName=ruby_press", "-PnexusModId=nexuscore_example").build();
+
+        Path generated = projectDir.resolve("common/src/main/java/generated/machine/RubyPress.java");
+        String source = Files.readString(generated);
+        assertEquals(TaskOutcome.SUCCESS, result.task(":nexusCreateMachine").getOutcome());
+        assertTrue(source.contains("NexusMachines.register"));
+        assertTrue(source.contains("SlotRole.INPUT"));
+        assertTrue(source.contains("nexuscore_example"));
     }
 
     private GradleRunner gradle(String... arguments) {

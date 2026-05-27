@@ -1,6 +1,7 @@
 package com.rollylindenshnizzer.nexuscore.client.debug;
 
 import com.rollylindenshnizzer.nexuscore.client.NexusClientDescriptors;
+import com.rollylindenshnizzer.nexuscore.client.machine.NexusMachineScreens;
 import com.rollylindenshnizzer.nexuscore.debug.DebugRegistry;
 import com.rollylindenshnizzer.nexuscore.debug.NexusDoctor;
 import com.rollylindenshnizzer.nexuscore.event.EventTrace;
@@ -40,6 +41,8 @@ public final class NexusDebugScreen extends BaseOwoScreen<FlowLayout> {
         root.child(Components.label(Component.translatable("screen.nexuscore.debug.title"))
                 .shadow(true)
                 .horizontalSizing(Sizing.content()));
+        root.child(Components.wrapVanillaWidget(Components.button(Component.translatable("screen.nexuscore.debug.open_machine_preview"),
+                button -> NexusMachineScreens.openFirstPreview(this))));
 
         FlowLayout columns = Containers.horizontalFlow(Sizing.fill(92), Sizing.fill(88));
         columns.gap(8);

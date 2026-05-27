@@ -36,6 +36,31 @@ public final class NexusCoreFabricGameTests implements FabricGameTest {
         run(helper, NexusCoreGameTestScenarios::benchmarkSuiteRecordsProfilerSamples);
     }
 
+    @GameTest(template = "nexuscore:bootstrap", timeoutTicks = 100)
+    public void machineFrameworkProcessesHybridRecipes(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::machineFrameworkProcessesHybridRecipes);
+    }
+
+    @GameTest(template = "nexuscore:bootstrap", timeoutTicks = 100)
+    public void inventoryTransferRulesTraceRoutes(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::inventoryTransferRulesTraceRoutes);
+    }
+
+    @GameTest(template = "nexuscore:bootstrap", timeoutTicks = 100)
+    public void energyAndFluidTransfersRespectSides(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::energyAndFluidTransfersRespectSides);
+    }
+
+    @GameTest(template = "nexuscore:bootstrap", timeoutTicks = 100)
+    public void worldgenAndEntityDefinitionsGenerateDescriptors(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::worldgenAndEntityDefinitionsGenerateDescriptors);
+    }
+
+    @GameTest(template = "nexuscore:bootstrap", timeoutTicks = 100)
+    public void typedDataLoaderValidatesDatapackJson(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::typedDataLoaderValidatesDatapackJson);
+    }
+
     private static void run(GameTestHelper helper, Runnable scenario) {
         scenario.run();
         helper.succeed();

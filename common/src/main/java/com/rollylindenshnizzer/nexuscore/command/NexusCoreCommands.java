@@ -13,8 +13,11 @@ import com.rollylindenshnizzer.nexuscore.data.DatagenReportWriters;
 import com.rollylindenshnizzer.nexuscore.data.NexusData;
 import com.rollylindenshnizzer.nexuscore.data.NexusDataValidator;
 import com.rollylindenshnizzer.nexuscore.debug.NexusDoctor;
+import com.rollylindenshnizzer.nexuscore.entity.NexusEntityDefinitions;
+import com.rollylindenshnizzer.nexuscore.machine.NexusMachines;
 import com.rollylindenshnizzer.nexuscore.network.NexusNetworking;
 import com.rollylindenshnizzer.nexuscore.registry.NexusContentManifest;
+import com.rollylindenshnizzer.nexuscore.worldgen.NexusWorldgen;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -55,6 +58,9 @@ public final class NexusCoreCommands {
                                 GSON.toJson(NexusModuleRegistry.toJson()))))
                         .then(Commands.literal("content").executes(context -> send(context.getSource(),
                                 GSON.toJson(NexusContentManifest.json(NexusCore.MOD_ID)))))
+                        .then(Commands.literal("machines").executes(context -> send(context.getSource(), NexusMachines.debugSummary())))
+                        .then(Commands.literal("worldgen").executes(context -> send(context.getSource(), NexusWorldgen.debugSummary())))
+                        .then(Commands.literal("entities").executes(context -> send(context.getSource(), NexusEntityDefinitions.debugSummary())))
                         .then(Commands.literal("config-schema").executes(context -> {
                             NexusConfigRegistry.configs().forEach(config -> context.getSource().sendSystemMessage(Component.literal(
                                     GSON.toJson(ConfigSchemaExporter.jsonSchema(config, NexusVersion.VERSION)))));
@@ -65,13 +71,25 @@ public final class NexusCoreCommands {
                 .then(Commands.literal("validate")
                         .then(Commands.literal("assets").executes(context -> validateData(context.getSource())))
                         .then(Commands.literal("tags").executes(context -> validateData(context.getSource())))
-                        .then(Commands.literal("recipes").executes(context -> validateData(context.getSource()))))
+                        .then(Commands.literal("recipes").executes(context -> validateData(context.getSource())))
+                        .then(Commands.literal("machines").executes(context -> send(context.getSource(), NexusMachines.debugSummary())))
+                        .then(Commands.literal("worldgen").executes(context -> send(context.getSource(), NexusWorldgen.debugSummary())))
+                        .then(Commands.literal("entities").executes(context -> send(context.getSource(), NexusEntityDefinitions.debugSummary()))))
                 .then(Commands.literal("inspect")
                         .then(Commands.literal("held-item").executes(context -> {
                             var player = context.getSource().getPlayerOrException();
                             context.getSource().sendSystemMessage(Component.literal(ComponentDebug.prettyPrint(player.getMainHandItem())));
                             return 1;
                         }))
+                        .then(Commands.literal("machine").executes(context -> send(context.getSource(), NexusMachines.debugSummary())))
+                        .then(Commands.literal("inventory").executes(context -> {
+                            var player = context.getSource().getPlayerOrException();
+                            context.getSource().sendSystemMessage(Component.literal("player inventory slots=" + player.getInventory().getContainerSize()));
+                            return 1;
+                        }))
+                        .then(Commands.literal("energy").executes(context -> send(context.getSource(), "Energy systems are exposed through NexusEnergyStorage debug sections.")))
+                        .then(Commands.literal("fluid").executes(context -> send(context.getSource(), "Fluid systems are exposed through NexusFluidTank debug sections.")))
+                        .then(Commands.literal("menu").executes(context -> send(context.getSource(), "Open menu inspection uses MenuDebugInfo snapshots.")))
                         .then(Commands.literal("target-block").executes(context -> {
                             context.getSource().sendSystemMessage(Component.literal("Target block inspection is available in the debug screen."));
                             return 1;
