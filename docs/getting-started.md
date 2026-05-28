@@ -2,7 +2,7 @@
 
 NexusCore is a Minecraft 1.21.1 Architectury library mod for Fabric and NeoForge. It provides common registration builders, datagen, config, diagnostics, networking helpers, machines, transfer abstractions, recipe viewer integration, client descriptors, testing helpers, and build tooling.
 
-For a complete package-by-package map, read `docs/system-catalog.md`. For a working dual-loader reference mod, read `examples/example-mod/README.md` and `docs/example-mod-walkthrough.md`.
+For a complete package-by-package map, read `docs/system-catalog.md`. For generated examples, read `docs/scaffolding-walkthrough.md` and `docs/v1.3/cookbook.md`.
 
 ## Project Shape
 
@@ -124,15 +124,13 @@ public static NexusData.DataPlan populateGeneratedData() {
 }
 ```
 
-Fabric uses `FabricDataGenerator.Pack.addProvider`. NeoForge uses `GatherDataEvent.addProvider`. The example mod shows both.
+Fabric uses `FabricDataGenerator.Pack.addProvider`. NeoForge uses `GatherDataEvent.addProvider`. The scaffolding guide shows how to generate focused starter classes.
 
 Run:
 
 ```powershell
 .\gradlew.bat :fabric:runDatagen
 .\gradlew.bat :neoforge:runDatagen
-.\gradlew.bat :example-fabric:runDatagen
-.\gradlew.bat :example-neoforge:runDatagen
 ```
 
 ## First Systems To Add
@@ -167,7 +165,8 @@ For release compatibility:
 ## Where To Go Next
 
 - `docs/system-catalog.md`: every package and subsystem.
-- `docs/example-mod-walkthrough.md`: the example mod in detail.
+- `docs/scaffolding-walkthrough.md`: generated example classes and workflow.
+- `docs/v1.3/index.md`: the v1.3 systems overview.
 - `docs/registry-guide.md`: registries and content modules.
 - `docs/item-block-guide.md`: content builders.
 - `docs/config-guide.md`: typed config and generated screens.

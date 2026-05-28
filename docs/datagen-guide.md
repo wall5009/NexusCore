@@ -131,4 +131,4 @@ DatagenReportWriters.writeHtml(report, output.resolve("datagen.html"));
 
 ## Example
 
-The example mod emits generated content from both `NexusCoreExampleContent.populateGeneratedData` and `NexusCoreExampleSystems.populateGeneratedData`. Inspect `examples/example-mod/*/src/generated/resources` after running datagen.
+Use `docs/scaffolding-walkthrough.md` to generate focused datagen starter classes. Inspect the generated resources under each loader module's configured datagen output after running `:fabric:runDatagen` or `:neoforge:runDatagen`.

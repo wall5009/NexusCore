@@ -79,4 +79,4 @@ plan.data("ruby_traits/polished_ruby.json", json);
 
 ## Example
 
-The example mod registers ruby ore worldgen, a ruby marker entity, projectile metadata, combat profile metadata, and a typed `ruby_traits` datapack loader.
+The scaffolding and GameTest coverage registers ruby ore worldgen, a ruby marker entity, projectile metadata, combat profile metadata, and a typed `ruby_traits` datapack loader.

@@ -123,4 +123,4 @@ The production GameTests cover hybrid recipe processing, inventory transfer trac
 
 ## Example
 
-See the ruby press in `NexusCoreExampleContent` and the UI/binding coverage in `NexusCoreExampleSystems.demonstrateMachineUi`.
+See the ruby press in `scaffolded content` and the UI/binding coverage in `NexusCoreGameTestScenarios`.

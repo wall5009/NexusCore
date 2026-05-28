@@ -105,4 +105,4 @@ TagKey<Block> rubyOres = NexusTags.block(MOD_ID, "ores/ruby");
 
 ## Example
 
-`NexusCoreExampleContent.beforeRegistries` demonstrates item, food, fuel, block, block item, model, loot, tag, color, and block set registration in one place.
+`scaffolded registry code` demonstrates item, food, fuel, block, block item, model, loot, tag, color, and block set registration in one place.

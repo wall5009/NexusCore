@@ -149,7 +149,7 @@ Fabric exposes this through Fabric Transfer. NeoForge exposes it through fluid c
 
 ## Example
 
-The example ruby press demonstrates:
+The scaffolded coverage ruby press demonstrates:
 
 - Descriptor registration.
 - Hybrid item/fluid/energy recipe.
@@ -160,4 +160,4 @@ The example ruby press demonstrates:
 - Runtime validation.
 - Debug state.
 
-See `NexusCoreExampleContent` and `NexusCoreExampleSystems.demonstrateMachineUi`.
+See `docs/scaffolding-walkthrough.md` and `NexusCoreGameTestScenarios`.

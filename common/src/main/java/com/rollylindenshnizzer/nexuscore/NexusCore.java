@@ -4,6 +4,9 @@ import com.rollylindenshnizzer.nexuscore.core.NexusDiagnostics;
 import com.rollylindenshnizzer.nexuscore.core.NexusLifecycle;
 import com.rollylindenshnizzer.nexuscore.command.NexusCoreCommands;
 import com.mojang.logging.LogUtils;
+import com.rollylindenshnizzer.nexuscore.debug.NexusDebugWorkbench;
+import com.rollylindenshnizzer.nexuscore.registry.NexusRegistries;
+import com.rollylindenshnizzer.nexuscore.runtime.NexusRuntimeContent;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
@@ -35,8 +38,11 @@ public final class NexusCore {
         }
         initialized = true;
         NexusLifecycle.installArchitecturyHooks();
+        NexusDebugWorkbench.installV13Tabs();
         NexusCoreCommands.install();
         NexusLifecycle.fire(NexusLifecycle.Phase.PRE_INIT);
+        NexusRuntimeContent.install(MOD_ID);
+        NexusRegistries.registerAll(MOD_ID);
         NexusLifecycle.fire(NexusLifecycle.Phase.COMMON_INIT);
         NexusDiagnostics.startup(MOD_ID).log(LOGGER);
         LOGGER.info("Initialized {}", MOD_ID);

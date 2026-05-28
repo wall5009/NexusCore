@@ -116,4 +116,4 @@ Use `MenuBinding` and `MenuDebugInfo` to document target bindings, quick-move ro
 
 ## Example
 
-The example mod declares a main channel in `NexusCoreExampleContent` and a diagnostics channel in `NexusCoreExampleSystems.demonstrateNetworking`. It also records network stats, tests a packet round trip, demonstrates request/response, and flushes a sync batch.
+The scaffolding and GameTest coverage declares a main channel in `scaffolded content` and a diagnostics channel in `NexusCoreGameTestScenarios`. It also records network stats, tests a packet round trip, demonstrates request/response, and flushes a sync batch.

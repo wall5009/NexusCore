@@ -65,6 +65,51 @@ public final class NexusCoreNeoForgeGameTests {
         run(helper, NexusCoreGameTestScenarios::typedDataLoaderValidatesDatapackJson);
     }
 
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "v13_dimension_portal", timeoutTicks = 100)
+    public static void v13DimensionAndPortalDefinitionsValidate(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::v13DimensionAndPortalDefinitionsValidate);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "v13_structure_rules", timeoutTicks = 100)
+    public static void v13StructureRulesExplainPlacement(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::v13StructureRulesExplainPlacement);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "v13_biome_ai", timeoutTicks = 100)
+    public static void v13BiomeAndAiHelpersProduceDebugReports(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::v13BiomeAndAiHelpersProduceDebugReports);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "v13_automation", timeoutTicks = 100)
+    public static void v13AutomationRoutesAndSimulatesNetworks(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::v13AutomationRoutesAndSimulatesNetworks);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "v13_data_balance_live", timeoutTicks = 100)
+    public static void v13DataDefinitionsBalanceLiveReloadAndSafetyWorkTogether(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::v13DataDefinitionsBalanceLiveReloadAndSafetyWorkTogether);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "v13_recipe_compat", timeoutTicks = 100)
+    public static void v13RecipeAndCompatibilityReportsAreConcrete(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::v13RecipeAndCompatibilityReportsAreConcrete);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "v13_runtime_registration", timeoutTicks = 100)
+    public static void v13RuntimeInstallerMaterializesAdvancedSystems(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::v13RuntimeInstallerMaterializesAdvancedSystems);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "v13_runtime_registration", timeoutTicks = 100)
+    public static void v13AdvancedCreationSystemsValidateAndGenerateData(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::v13AdvancedCreationSystemsValidateAndGenerateData);
+    }
+
+    @GameTest(templateNamespace = NexusCore.MOD_ID, template = "v13_data_balance_live", timeoutTicks = 100)
+    public static void v13AuthoringDataSimulationAndSafetyDescriptorsWork(GameTestHelper helper) {
+        run(helper, NexusCoreGameTestScenarios::v13AuthoringDataSimulationAndSafetyDescriptorsWork);
+    }
+
     private static void run(GameTestHelper helper, Runnable scenario) {
         scenario.run();
         helper.succeed();

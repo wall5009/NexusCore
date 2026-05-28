@@ -11,49 +11,49 @@ authors="${mod_author}"
 description='''${mod_description}'''
 logoFile="assets/${mod_id}/icon.png"
 
-[[dependencies.${mod_id}]]
+[[dependencies.nexuscore]]
 modId="neoforge"
 type="required"
 versionRange="[21.1,)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.nexuscore]]
 modId="minecraft"
 type="required"
 versionRange="[${minecraft_version},)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.nexuscore]]
 modId="architectury"
 type="required"
 versionRange="[${architectury_api_version},)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.nexuscore]]
 modId="owo"
 type="required"
 versionRange="[${owo_lib_neoforge_version},)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.nexuscore]]
 modId="jei"
 type="optional"
 versionRange="[19,)"
 ordering="AFTER"
 side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.nexuscore]]
 modId="emi"
 type="optional"
 versionRange="[1,)"
 ordering="AFTER"
 side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.nexuscore]]
 modId="roughlyenoughitems"
 type="optional"
 versionRange="[16,)"

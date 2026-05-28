@@ -4,10 +4,12 @@ import com.rollylindenshnizzer.nexuscore.NexusCore;
 import com.rollylindenshnizzer.nexuscore.data.NexusData;
 import com.rollylindenshnizzer.nexuscore.data.NexusDataProvider;
 import com.rollylindenshnizzer.nexuscore.neoforge.test.NexusCoreNeoForgeGameTests;
+import com.rollylindenshnizzer.nexuscore.runtime.NexusRuntimeRepositorySource;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
 import net.neoforged.fml.common.Mod;
 
@@ -21,11 +23,16 @@ import net.neoforged.fml.common.Mod;
 public final class NexusCoreNeoForge {
     public NexusCoreNeoForge(IEventBus modBus) {
         NexusCore.init();
+        modBus.addListener(this::addPackFinders);
         modBus.addListener(this::gatherData);
         modBus.addListener(this::registerGameTests);
         if (Platform.getEnvironment() == Env.CLIENT) {
             initClientByReflection();
         }
+    }
+
+    private void addPackFinders(AddPackFindersEvent event) {
+        event.addRepositorySource(NexusRuntimeRepositorySource.INSTANCE);
     }
 
     private void gatherData(GatherDataEvent event) {

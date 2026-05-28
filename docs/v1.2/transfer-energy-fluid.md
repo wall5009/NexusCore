@@ -84,4 +84,4 @@ Common code should not depend on loader capability classes. Keep common logic on
 
 ## Example
 
-`NexusCoreExampleSystems.demonstrateTransfers` moves energy and fluid between side-aware storages. `demonstrateInventory` routes item stacks with transfer rules and records an inventory diff.
+`NexusCoreGameTestScenarios` moves energy and fluid between side-aware storages. `demonstrateInventory` routes item stacks with transfer rules and records an inventory diff.

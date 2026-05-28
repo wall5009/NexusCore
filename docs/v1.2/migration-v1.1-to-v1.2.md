@@ -26,7 +26,7 @@ Run:
 
 ## Recipe Viewers
 
-v1.1 introduced concrete JEI/EMI/REI plugins and advanced recipe layout descriptors. v1.2 keeps those APIs and the example now demonstrates multi-page displays, fluids, progress, and viewer-specific controls.
+v1.1 introduced concrete JEI/EMI/REI plugins and advanced recipe layout descriptors. v1.2 keeps those APIs and the scaffolded coverage now demonstrates multi-page displays, fluids, progress, and viewer-specific controls.
 
 ## Config Screens
 
@@ -40,6 +40,6 @@ If v1.1 code only registered descriptors, v1.2 can now install real runtime clie
 
 `NexusDataProvider` now also writes registered worldgen and entity descriptor data for the target mod ID. Review generated output after migration.
 
-## Example
+## Examples
 
-Use `examples/example-mod` as the migration target. It demonstrates the expected v1.2 style for every subsystem.
+Use `docs/scaffolding-walkthrough.md` and `docs/v1.3/cookbook.md` as the maintained migration targets. The embedded example mod was removed in v1.3, but the v1.2 public APIs remain covered by `checkV12SourceCompatibility` and GameTest scenarios.

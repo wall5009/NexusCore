@@ -1,12 +1,12 @@
 # NexusCore v1.2 Getting Started
 
-v1.2 expands NexusCore from registration and tooling into gameplay systems: machines, inventory transfer, side-aware energy/fluid storage, generated machine screens, entity/worldgen/resource descriptors, client runtime descriptors, performance diagnostics, and deeper examples.
+v1.2 expands NexusCore from registration and tooling into gameplay systems: machines, inventory transfer, side-aware energy/fluid storage, generated machine screens, entity/worldgen/resource descriptors, client runtime descriptors, performance diagnostics, and scaffolding-backed examples.
 
 Read this together with:
 
 - `docs/system-catalog.md`
-- `docs/example-mod-walkthrough.md`
-- `examples/example-mod/README.md`
+- `docs/scaffolding-walkthrough.md`
+- `docs/v1.3/index.md`
 
 ## New Modules In v1.2
 
@@ -89,8 +89,6 @@ Run:
 .\gradlew.bat runNexusValidation
 .\gradlew.bat :fabric:runGametest
 .\gradlew.bat :neoforge:runGametest
-.\gradlew.bat :example-fabric:build
-.\gradlew.bat :example-neoforge:build
 ```
 
 For stable releases, also run binary compatibility checks and docs generation.

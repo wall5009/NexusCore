@@ -112,4 +112,4 @@ Before publishing:
 
 ## Example
 
-The example mod uses `ValidationSuite`, `PacketTestHarness`, debug sections, datagen validation, benchmarks, and subsystem snapshots. NexusCore itself includes the loader GameTests.
+The scaffolding and GameTest coverage uses `ValidationSuite`, `PacketTestHarness`, debug sections, datagen validation, benchmarks, and subsystem snapshots. NexusCore itself includes the loader GameTests.

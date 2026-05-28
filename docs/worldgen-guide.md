@@ -78,4 +78,4 @@ The `world` package complements worldgen:
 
 ## Example
 
-The example ruby ore descriptor is registered in `NexusCoreExampleContent.beforeRegistries`. `NexusCoreExampleSystems.demonstratePlayerWorldSecurity` exercises world radius iteration, structure centers, and teleport target descriptors.
+The scaffolded coverage ruby ore descriptor is registered in `scaffolded registry code`. `NexusCoreGameTestScenarios` exercises world radius iteration, structure centers, and teleport target descriptors.

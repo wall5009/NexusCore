@@ -84,4 +84,4 @@ Generated `.architectury-transformer` output is ignored and should not be commit
 
 ## Example
 
-The example mod exposes validation, packet tests, benchmark output, registry reports, datapack loader summaries, and subsystem snapshots through debug sections. It is intended to be a living release smoke test for the public API.
+The scaffolding and GameTest coverage exposes validation, packet tests, benchmark output, registry reports, datapack loader summaries, and subsystem snapshots through debug sections. It is intended to be a living release smoke test for the public API.

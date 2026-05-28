@@ -1,7 +1,7 @@
 package com.rollylindenshnizzer.nexuscore.core;
 
 public final class NexusVersion {
-    public static final String VERSION = "1.2.0-build.2";
+    public static final String VERSION = "1.3.0-build.1";
     public static final String MINECRAFT_VERSION = "1.21.1";
     public static final String JAVA_VERSION = "21";
     public static final String ARCHITECTURY_VERSION = "13.0.8";

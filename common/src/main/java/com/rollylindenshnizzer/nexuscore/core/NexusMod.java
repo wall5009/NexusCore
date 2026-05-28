@@ -3,6 +3,7 @@ package com.rollylindenshnizzer.nexuscore.core;
 import com.rollylindenshnizzer.nexuscore.registry.ContentModule;
 import com.rollylindenshnizzer.nexuscore.registry.ContentModuleManager;
 import com.rollylindenshnizzer.nexuscore.registry.NexusRegistries;
+import com.rollylindenshnizzer.nexuscore.runtime.NexusRuntimeContent;
 import org.slf4j.Logger;
 
 import java.util.Collection;
@@ -39,6 +40,7 @@ public abstract class NexusMod {
         beforeRegistries();
         ContentModuleManager modules = ContentModuleManager.create(modId, modules());
         modules.initialize();
+        NexusRuntimeContent.install(modId);
         NexusRegistries.group(modId).registerAll();
         onInitialize();
         NexusLifecycle.fire(NexusLifecycle.Phase.COMMON_INIT);

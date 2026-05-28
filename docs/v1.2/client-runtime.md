@@ -69,4 +69,4 @@ The debug browser can preview the first registered machine through `openFirstPre
 
 ## Example
 
-The example mod registers common-safe descriptors in `NexusCoreExampleSystems.registerBeforeRegistries` and demonstrates screen specs, widgets, forms, HUD overlays, and machine bindings in `demonstrateUi`.
+The scaffolding and GameTest coverage registers common-safe descriptors in `NexusCoreGameTestScenarios` and demonstrates screen specs, widgets, forms, HUD overlays, and machine bindings in `demonstrateUi`.

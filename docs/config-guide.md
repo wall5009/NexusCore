@@ -135,4 +135,4 @@ Definitions remain loader-neutral. Screens are client-only.
 
 ## Example
 
-The example config in `NexusCoreExampleContent.ExampleConfig` covers int, boolean, string, and enum options. `NexusCoreExampleSystems.demonstrateConfig` demonstrates presets, migrations, option metadata, and owo bridge status.
+The scaffolded coverage config in `a scaffolded NexusConfig` covers int, boolean, string, and enum options. `NexusCoreGameTestScenarios` demonstrates presets, migrations, option metadata, and owo bridge status.

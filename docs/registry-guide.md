@@ -86,7 +86,7 @@ public final class MachinesModule implements ContentModule {
 
 Return modules from `NexusMod.modules()`. `ContentModuleManager` sorts dependencies, rejects duplicates, detects cycles, and calls `register`, `dataGeneration`, and `compatibility`.
 
-The example mod uses two content modules in `NexusCoreExampleSystems.contentModules`.
+The scaffolding and GameTest coverage uses two content modules in `NexusCoreGameTestScenarios`.
 
 ## Manifest And Reports
 

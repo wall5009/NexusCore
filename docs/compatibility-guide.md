@@ -96,4 +96,4 @@ Declare optional integrations in loader metadata:
 
 ## Example
 
-The example mod demonstrates recipe viewer categories/displays, optional dependency metadata, owo-backed generated screens through config metadata, Fabric/NeoForge loader wrappers, Team Reborn Energy suggestion, and common-safe client descriptors.
+The scaffolding and GameTest coverage demonstrates recipe viewer categories/displays, optional dependency metadata, owo-backed generated screens through config metadata, Fabric/NeoForge loader wrappers, Team Reborn Energy suggestion, and common-safe client descriptors.

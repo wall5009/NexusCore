@@ -18,7 +18,7 @@ Good debug sections are:
 - Short enough for commands.
 - Stable enough for support reports.
 
-The example mod registers sections for items, blocks, components, config, machine state, validation, systems, datapack loading, benchmarks, registry reports, menus, and entities.
+The scaffolding and GameTest coverage registers sections for items, blocks, components, config, machine state, validation, systems, datapack loading, benchmarks, registry reports, menus, and entities.
 
 ## Debug Commands
 
@@ -112,4 +112,4 @@ On the client, the Nexus profiler HUD can display top sections.
 
 ## Example
 
-`NexusCoreExampleSystems` demonstrates crash hints, doctor reports, datagen validation summaries, registry reports, debug sections, event traces, and profiler data.
+`NexusCoreGameTestScenarios` demonstrates crash hints, doctor reports, datagen validation summaries, registry reports, debug sections, event traces, and profiler data.

@@ -1,13 +1,13 @@
 # NexusCore System Catalog
 
-This catalog is the high-level map of NexusCore. It covers every public system and points to the example mod usage site for each one. Use it when deciding which package to reach for, when reviewing release coverage, or when onboarding a new contributor.
+This catalog is the high-level map of NexusCore. It covers every public system and points to maintained docs, scaffolds, and GameTests for usage coverage. Use it when deciding which package to reach for, when reviewing release coverage, or when onboarding a new contributor.
 
 ## Reading Order
 
 1. Start with `docs/getting-started.md` for project setup and bootstrap.
-2. Read `examples/example-mod/README.md` to see the same systems assembled into a dual-loader mod.
+2. Read `docs/scaffolding-walkthrough.md` to generate focused examples for your own mod.
 3. Use this catalog as the package-by-package reference.
-4. Use the versioned `docs/v1.2/` pages for the systems added or heavily expanded in v1.2.
+4. Use the versioned `docs/v1.2/` and `docs/v1.3/` pages for systems added in those releases.
 
 ## Module And Loader Layout
 
@@ -17,9 +17,6 @@ This catalog is the high-level map of NexusCore. It covers every public system a
 | `fabric` | Fabric runtime bindings | Fabric entrypoint, Fabric datagen, Fabric GameTest entrypoint, Fabric Transfer bridge, Team Reborn Energy bridge, Fabric recipe viewer plugins, Fabric worldgen runtime bridge |
 | `neoforge` | NeoForge runtime bindings | NeoForge entrypoint, NeoForge datagen, NeoForge GameTest registration, capabilities, NeoForge recipe viewer plugins |
 | `nexus-gradle` | Build tooling | Scaffolding tasks, validation tasks, docs site tasks, ABI tasks, release metadata |
-| `examples/example-mod/common` | Shared example mod | Compile-checked usage of every common subsystem |
-| `examples/example-mod/fabric` | Fabric example wrapper | Fabric entrypoint and Fabric datagen |
-| `examples/example-mod/neoforge` | NeoForge example wrapper | NeoForge `@Mod` entrypoint and data event provider |
 
 ## Core
 
@@ -41,9 +38,9 @@ Important classes:
 
 Example usage:
 
-- `NexusCoreExampleContent` extends `NexusMod`.
-- `NexusCoreExampleFabric` and `NexusCoreExampleNeoForge` call `NexusCore.init()` and then `NexusCoreExampleContent.bootstrap()`.
-- `NexusCoreExampleSystems.demonstrateCoreAndDiagnostics` uses IDs, diagnostics, crash hints, resource paths, and task queues.
+- `docs/scaffolding-walkthrough.md` shows how to generate focused code examples.
+- `NexusCoreGameTestScenarios` contains compile-checked usage of public systems.
+- `docs/v1.3/cookbook.md` gives copyable snippets for the newer systems.
 
 Guidance:
 
@@ -69,9 +66,9 @@ Important classes:
 
 Example usage:
 
-- `NexusCoreExampleContent.beforeRegistries` registers the creative tab, items, blocks, data component, block set, and machine.
-- `NexusCoreExampleSystems.contentModules` demonstrates dependency-sorted modules.
-- `NexusCoreExampleSystems.registerBeforeRegistries` records group metadata, menu type, sounds, entity type, custom registry spec, and tags.
+- `scaffolded registry code` registers the creative tab, items, blocks, data component, block set, and machine.
+- `NexusCoreGameTestScenarios` demonstrates dependency-sorted modules.
+- `NexusCoreGameTestScenarios` records group metadata, menu type, sounds, entity type, custom registry spec, and tags.
 
 Guidance:
 
@@ -97,7 +94,7 @@ Example usage:
 - `ruby`, `raw_ruby`, and `ruby_apple` demonstrate generated item models, tooltips, food, and fuel.
 - `ruby_block` and `ruby_ore` demonstrate block item generation, cube models, self-drop loot, mining tags, tool level tags, strength, map color, and colors.
 - `sapphireSet` demonstrates a generated gem block set with recipes and tags.
-- `NexusCoreExampleSystems.populateGeneratedData` emits extra tags and loot through lower-level builders.
+- `NexusCoreGameTestScenarios` emits extra tags and loot through lower-level builders.
 
 Guidance:
 
@@ -120,8 +117,8 @@ Important classes:
 Example usage:
 
 - `modeComponent` is a persistent, network-synced item component with default metadata and tooltip behavior.
-- `NexusCoreExampleSystems.demonstrateComponents` compares component maps and migrates a legacy NBT key into the component.
-- `NexusCoreExampleSystems.demonstratePersistence` uses attachment keys, copy policies, saved-data migration, NBT helpers, and player data copying.
+- `NexusCoreGameTestScenarios` compares component maps and migrates a legacy NBT key into the component.
+- `NexusCoreGameTestScenarios` uses attachment keys, copy policies, saved-data migration, NBT helpers, and player data copying.
 
 Guidance:
 
@@ -145,7 +142,7 @@ Example usage:
 
 - `ExampleConfig` defines int, boolean, string, and enum options.
 - `ConfigSchemaExporter.jsonSchema(config, "1.1")` exports schema metadata.
-- `NexusCoreExampleSystems.demonstrateConfig` creates a preset, applies a migration, and verifies owo bridge availability.
+- `NexusCoreGameTestScenarios` creates a preset, applies a migration, and verifies owo bridge availability.
 
 Guidance:
 
@@ -169,8 +166,8 @@ Important classes:
 
 Example usage:
 
-- `NexusCoreExampleContent.populateGeneratedData` writes translations, recipes, worldgen configured feature JSON, and advancements.
-- `NexusCoreExampleSystems.populateGeneratedData` adds tags, loot, subtitles, keybind translations, config translations, and typed data JSON.
+- `scaffolded datagen code` writes translations, recipes, worldgen configured feature JSON, and advancements.
+- `NexusCoreGameTestScenarios` adds tags, loot, subtitles, keybind translations, config translations, and typed data JSON.
 - Fabric and NeoForge example datagen providers both consume the same data plan.
 
 Guidance:
@@ -196,8 +193,8 @@ Important classes:
 
 Example usage:
 
-- `NexusCoreExampleSystems.demonstrateDataAndResources` loads a `ruby_traits/polished_ruby` entry through a schema-backed typed loader.
-- `NexusCoreExampleSystems.populateGeneratedData` emits the matching JSON.
+- `NexusCoreGameTestScenarios` loads a `ruby_traits/polished_ruby` entry through a schema-backed typed loader.
+- `NexusCoreGameTestScenarios` emits the matching JSON.
 
 Guidance:
 
@@ -222,9 +219,9 @@ Important classes:
 Example usage:
 
 - `rubyPressDefinition` declares energy capacity, fluid capacity, slot groups, generated screen, and category.
-- `rubyPressRecipe` consumes redstone and water to produce a diamond in the example.
+- `rubyPressRecipe` consumes redstone and water to produce a diamond in the scaffolded coverage.
 - `MachineProcessingEngine` is ticked in `onInitialize` and verified by `ValidationSuite`.
-- `NexusCoreExampleSystems.demonstrateTransfers`, `demonstrateInventory`, and `demonstrateMachineUi` show the supporting APIs.
+- `NexusCoreGameTestScenarios`, `demonstrateInventory`, and `demonstrateMachineUi` show the supporting APIs.
 
 Guidance:
 
@@ -247,7 +244,7 @@ Important classes:
 
 Example usage:
 
-- `NexusCoreExampleContent.registerRecipeViewerContent` creates one portable category and a two-page display.
+- `scaffolded content.registerRecipeViewerContent` creates one portable category and a two-page display.
 - The first page includes fluid input, animated progress, item catalyst, JEI transfer button, EMI recipe tree control, REI info button, and tooltip areas.
 - The second page demonstrates multi-page display fallback.
 
@@ -271,8 +268,8 @@ Important classes:
 
 Example usage:
 
-- `NexusCoreExampleSystems.registerBeforeRegistries` registers common-safe client descriptors.
-- `NexusCoreExampleSystems.demonstrateUi` builds screen specs, widgets, form validation, router state, mini-markup, rich text, HUD overlays, and machine UI bindings.
+- `NexusCoreGameTestScenarios` registers common-safe client descriptors.
+- `NexusCoreGameTestScenarios` builds screen specs, widgets, form validation, router state, mini-markup, rich text, HUD overlays, and machine UI bindings.
 
 Guidance:
 
@@ -294,9 +291,9 @@ Important classes:
 
 Example usage:
 
-- `NexusCoreExampleContent` declares a `main` channel with a protocol version and mismatch message.
-- `NexusCoreExampleSystems.demonstrateNetworking` creates a diagnostic channel, records network stats, tests a packet round trip, queues a sync batch, and runs request/response.
-- `NexusCoreExampleSystems.demonstratePlayerWorldSecurity` validates a client action and safe export path.
+- `scaffolded content` declares a `main` channel with a protocol version and mismatch message.
+- `NexusCoreGameTestScenarios` creates a diagnostic channel, records network stats, tests a packet round trip, queues a sync batch, and runs request/response.
+- `NexusCoreGameTestScenarios` validates a client action and safe export path.
 
 Guidance:
 
@@ -318,9 +315,9 @@ Important classes:
 
 Example usage:
 
-- The example registers the `/nexuscoreexample` command and installs debug commands.
+- The scaffolded coverage registers the `/nexus` command and installs debug commands.
 - Debug sections report items, blocks, machine state, validation, system snapshots, datapack loader status, benchmark output, registry report, and entity registration.
-- `NexusCoreExampleSystems.demonstrateEvents` registers a server tick listener and records event traces.
+- `NexusCoreGameTestScenarios` registers a server tick listener and records event traces.
 
 Guidance:
 
@@ -344,7 +341,7 @@ Example usage:
 
 - `ruby_marker` is registered as an entity type through `NexusEntityDefinitions.registerType`.
 - `NexusWorldgen.ore` describes the ruby ore feature.
-- `NexusCoreExampleSystems.demonstratePlayerWorldSecurity` uses radius iteration, structure center helpers, teleport target descriptors, and combat profiles.
+- `NexusCoreGameTestScenarios` uses radius iteration, structure center helpers, teleport target descriptors, and combat profiles.
 
 Guidance:
 
@@ -366,8 +363,8 @@ Important classes:
 
 Example usage:
 
-- `ValidationSuite` verifies the example machine output.
-- `NexusCoreExampleSystems.demonstratePerformance` records profiler sections, runs a benchmark, exercises caches, queues chunk work, marks block updates, rate-limits an action, and uses a weighted table.
+- `ValidationSuite` verifies the scaffolded coverage machine output.
+- `NexusCoreGameTestScenarios` records profiler sections, runs a benchmark, exercises caches, queues chunk work, marks block updates, rate-limits an action, and uses a weighted table.
 - Fabric and NeoForge GameTests run the shared `NexusCoreGameTestScenarios`.
 
 Guidance:

@@ -94,12 +94,11 @@ Optional integrations are loaded through metadata and safe classloading:
 - Fabric energy uses Team Reborn Energy. NeoForge energy uses capabilities.
 - Loader bridges are isolated in loader modules so common code stays portable.
 
-## Example Reference
+## Maintained Usage References
 
-The example mod follows this architecture:
+The embedded example mod was removed. Current usage coverage is maintained through:
 
-- `NexusCoreExampleContent` owns normal mod bootstrap and content.
-- `NexusCoreExampleSystems` gives compile-checked coverage for every subsystem.
-- Fabric and NeoForge modules only adapt loader entrypoints and datagen.
-
-Read `docs/example-mod-walkthrough.md` for a detailed tour.
+- `docs/scaffolding-walkthrough.md` for generated starter classes.
+- `docs/v1.3/cookbook.md` for copyable system snippets.
+- `NexusCoreGameTestScenarios` for compile-checked common API coverage.
+- Fabric and NeoForge GameTest wrappers for loader registration coverage.

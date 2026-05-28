@@ -24,10 +24,46 @@ public final class NexusModuleRegistry {
         register(new NexusModuleMetadata("nexus-worldgen", NexusVersion.VERSION, List.of("fabric", "neoforge"),
                 List.of("nexus-core"), List.of(),
                 "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-world", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core", "nexus-worldgen"), List.of(),
+                "[1.21.1,1.22)", "stable"));
         register(new NexusModuleMetadata("nexus-entity", NexusVersion.VERSION, List.of("fabric", "neoforge"),
                 List.of("nexus-core"), List.of(),
                 "[1.21.1,1.22)", "stable"));
         register(new NexusModuleMetadata("nexus-resource", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core"), List.of(),
+                "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-compat", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core"), List.of("jei", "emi", "roughlyenoughitems", "trinkets", "curios", "luckperms"),
+                "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-automation", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core", "nexus-transfer"), List.of("teamreborn-energy"),
+                "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-ai", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core", "nexus-entity"), List.of(),
+                "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-structure", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core", "nexus-world"), List.of(),
+                "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-dimension", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core", "nexus-world"), List.of(),
+                "[1.21.1,1.22)", "stable"));
+        register(new NexusModuleMetadata("nexus-multiblock", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core", "nexus-machine"), List.of("jei", "emi", "roughlyenoughitems"),
+                "[1.21.1,1.22)", "incubating"));
+        register(new NexusModuleMetadata("nexus-ritual", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core", "nexus-multiblock"), List.of("claim-protection-bridges", "guidebook-bridges"),
+                "[1.21.1,1.22)", "incubating"));
+        register(new NexusModuleMetadata("nexus-progression", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core"), List.of("guidebook-bridges", "permissions"),
+                "[1.21.1,1.22)", "incubating"));
+        register(new NexusModuleMetadata("nexus-authoring", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core", "nexus-debug"), List.of(),
+                "[1.21.1,1.22)", "incubating"));
+        register(new NexusModuleMetadata("nexus-simulation", NexusVersion.VERSION, List.of("fabric", "neoforge"),
+                List.of("nexus-core"), List.of(),
+                "[1.21.1,1.22)", "incubating"));
+        register(new NexusModuleMetadata("nexus-debug", NexusVersion.VERSION, List.of("fabric", "neoforge"),
                 List.of("nexus-core"), List.of(),
                 "[1.21.1,1.22)", "stable"));
     }
