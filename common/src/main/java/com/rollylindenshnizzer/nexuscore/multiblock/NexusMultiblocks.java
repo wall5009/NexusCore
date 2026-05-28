@@ -5,8 +5,16 @@ import com.google.gson.JsonObject;
 import com.rollylindenshnizzer.nexuscore.api.NexusIncubating;
 import com.rollylindenshnizzer.nexuscore.core.NexusIds;
 import com.rollylindenshnizzer.nexuscore.data.NexusData;
+import com.rollylindenshnizzer.nexuscore.world.NexusWorldEvent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -910,6 +918,337 @@ public final class NexusMultiblocks {
     public static final class AssemblyManager {
         private final Map<AssemblyKey, MultiblockAssembly> assemblies = new LinkedHashMap<>();
         private final List<AssemblyEvent> eventLog = new ArrayList<>();
+
+        public List<AssemblyResult> handleWorldEvent(NexusWorldEvent event) {
+            if (!event.serverSide()) {
+                return List.of();
+            }
+            return switch (event.kind()) {
+                case BLOCK_BREAK -> {
+                    if (event.hasBlockContext()) {
+                        invalidateAt(event.dimension(), event.pos(), "world_break:" + event.hook());
+                    }
+                    yield List.of();
+                }
+                case BLOCK_PLACE -> {
+                    if (!event.hasBlockContext()) {
+                        yield List.of();
+                    }
+                    invalidateAt(event.dimension(), event.pos(), "world_place:" + event.hook());
+                    yield tryAssembleFromWorld(event.level(), event.pos(), event.player(), false, event.hook());
+                }
+                case BLOCK_INTERACT -> {
+                    if (!event.hasBlockContext()) {
+                        yield List.of();
+                    }
+                    yield tryAssembleFromWorld(event.level(), event.pos(), event.player(), true, event.hook());
+                }
+                case LEVEL_TICK_START, LEVEL_TICK_END, SERVER_TICK_START, SERVER_TICK_END -> {
+                    trimCaches();
+                    yield List.of();
+                }
+                default -> List.of();
+            };
+        }
+
+        public List<AssemblyResult> tryAssembleFromWorld(Level level, BlockPos controllerPos, Player player, boolean manual, String source) {
+            if (level == null || controllerPos == null) {
+                return List.of();
+            }
+            BlockState controllerState = level.getBlockState(controllerPos);
+            String dimension = level.dimension().location().toString();
+            List<AssemblyResult> results = new ArrayList<>();
+            for (MultiblockDefinition definition : DEFINITIONS.values()) {
+                if (manual && !definition.manualAssembly()) {
+                    continue;
+                }
+                if (!manual && !definition.automaticAssembly()) {
+                    continue;
+                }
+                if (!controllerMatches(definition, controllerState)) {
+                    continue;
+                }
+                AssemblyKey key = new AssemblyKey(definition.id(), dimension, controllerPos);
+                if (assemblies.containsKey(key)) {
+                    continue;
+                }
+                List<PartMetadata> parts = definition.scalable()
+                        ? scalableControllerPart(controllerPos, controllerState, player, source)
+                        : matchFixedPattern(level, controllerPos, definition, player, source).orElse(List.of());
+                if (parts.isEmpty()) {
+                    continue;
+                }
+                results.add(assemble(definition.id(), dimension, controllerPos, parts));
+            }
+            return List.copyOf(results);
+        }
+
+        private void invalidateAt(String dimension, BlockPos changed, String reason) {
+            List<AssemblyKey> invalidated = assemblies.entrySet().stream()
+                    .filter(entry -> entry.getKey().dimension().equals(dimension))
+                    .filter(entry -> entry.getKey().controllerPos().equals(changed)
+                            || entry.getValue().parts().stream().anyMatch(part -> part.pos().equals(changed)))
+                    .map(Map.Entry::getKey)
+                    .toList();
+            for (AssemblyKey key : invalidated) {
+                MultiblockAssembly previous = assemblies.remove(key);
+                if (previous != null) {
+                    eventLog.add(new AssemblyEvent(key, AssemblyState.DISASSEMBLED, reason, Instant.now()));
+                }
+            }
+            trimCaches();
+        }
+
+        private static List<PartMetadata> scalableControllerPart(BlockPos controllerPos, BlockState controllerState, Player player, String source) {
+            Map<String, String> metadata = new LinkedHashMap<>();
+            metadata.put("runtime", "world_hook");
+            metadata.put("source", source == null ? "unknown" : source);
+            metadata.put("scalable", "true");
+            if (player != null) {
+                metadata.put("player", player.getUUID().toString());
+            }
+            return List.of(new PartMetadata(controllerPos, PartRole.CONTROLLER, blockId(controllerState), false, false, false, metadata));
+        }
+
+        private static Optional<List<PartMetadata>> matchFixedPattern(Level level,
+                                                                      BlockPos controllerPos,
+                                                                      MultiblockDefinition definition,
+                                                                      Player player,
+                                                                      String source) {
+            if (definition.layers().isEmpty()) {
+                return Optional.empty();
+            }
+            int width = definition.layers().getFirst().width();
+            int depth = definition.layers().getFirst().depth();
+            for (PatternTransform transform : transforms(definition)) {
+                for (PatternOffset controllerOffset : controllerOffsets(definition)) {
+                    BlockPos transformedControllerOffset = transform.apply(controllerOffset.x(), controllerOffset.y(), controllerOffset.z(), width, depth);
+                    BlockPos origin = controllerPos.subtract(transformedControllerOffset);
+                    Optional<List<PartMetadata>> match = matchAt(level, origin, controllerPos, definition, transform, width, depth, player, source);
+                    if (match.isPresent()) {
+                        return match;
+                    }
+                }
+            }
+            return Optional.empty();
+        }
+
+        private static Optional<List<PartMetadata>> matchAt(Level level,
+                                                            BlockPos origin,
+                                                            BlockPos controllerPos,
+                                                            MultiblockDefinition definition,
+                                                            PatternTransform transform,
+                                                            int width,
+                                                            int depth,
+                                                            Player player,
+                                                            String source) {
+            List<PartMetadata> parts = new ArrayList<>();
+            for (PatternLayer layer : definition.layers()) {
+                for (int z = 0; z < layer.depth(); z++) {
+                    String row = layer.rows().get(z);
+                    for (int x = 0; x < width; x++) {
+                        char key = x < row.length() ? row.charAt(x) : ' ';
+                        if (key == ' ') {
+                            continue;
+                        }
+                        BlockMatcher matcher = definition.matchers().get(key);
+                        if (matcher == null) {
+                            return Optional.empty();
+                        }
+                        BlockPos worldPos = origin.offset(transform.apply(x, layer.index(), z, width, depth));
+                        BlockState state = level.getBlockState(worldPos);
+                        if (!matches(level, worldPos, state, matcher)) {
+                            if (matcher.optional()) {
+                                continue;
+                            }
+                            return Optional.empty();
+                        }
+                        PartRole role = roleFor(definition, key, matcher, worldPos.equals(controllerPos));
+                        Map<String, String> metadata = new LinkedHashMap<>();
+                        metadata.put("pattern_key", Character.toString(key));
+                        metadata.put("runtime", "world_hook");
+                        metadata.put("source", source == null ? "unknown" : source);
+                        metadata.put("transform", transform.serializedName());
+                        if (player != null) {
+                            metadata.put("player", player.getUUID().toString());
+                        }
+                        parts.add(new PartMetadata(worldPos, role, blockId(state), exposesItems(role), exposesEnergy(role), exposesFluids(role), metadata));
+                    }
+                }
+            }
+            if (parts.stream().noneMatch(part -> part.pos().equals(controllerPos))) {
+                return Optional.empty();
+            }
+            return Optional.of(parts);
+        }
+
+        private static List<PatternOffset> controllerOffsets(MultiblockDefinition definition) {
+            List<PatternOffset> offsets = new ArrayList<>();
+            for (PatternLayer layer : definition.layers()) {
+                for (int z = 0; z < layer.depth(); z++) {
+                    String row = layer.rows().get(z);
+                    for (int x = 0; x < row.length(); x++) {
+                        char key = row.charAt(x);
+                        if (key == ' ') {
+                            continue;
+                        }
+                        BlockMatcher matcher = definition.matchers().get(key);
+                        PartRole role = definition.roles().get(key);
+                        boolean roleController = role == PartRole.CONTROLLER || matcher != null && matcher.role().orElse(null) == PartRole.CONTROLLER;
+                        boolean valueController = matcher != null && !definition.controller().isBlank() && matcher.value().equals(definition.controller());
+                        if (roleController || valueController) {
+                            offsets.add(new PatternOffset(x, layer.index(), z));
+                        }
+                    }
+                }
+            }
+            if (offsets.isEmpty()) {
+                offsets.add(new PatternOffset(0, 0, 0));
+            }
+            return offsets;
+        }
+
+        private static List<PatternTransform> transforms(MultiblockDefinition definition) {
+            List<PatternTransform> transforms = new ArrayList<>();
+            transforms.add(PatternTransform.NONE);
+            if (definition.rotatable()) {
+                transforms.add(PatternTransform.CLOCKWISE);
+                transforms.add(PatternTransform.HALF);
+                transforms.add(PatternTransform.COUNTER_CLOCKWISE);
+            }
+            if (definition.mirrorable()) {
+                transforms.add(PatternTransform.MIRROR);
+                if (definition.rotatable()) {
+                    transforms.add(PatternTransform.MIRROR_CLOCKWISE);
+                    transforms.add(PatternTransform.MIRROR_HALF);
+                    transforms.add(PatternTransform.MIRROR_COUNTER_CLOCKWISE);
+                }
+            }
+            return transforms;
+        }
+
+        private static boolean controllerMatches(MultiblockDefinition definition, BlockState state) {
+            if (state == null) {
+                return false;
+            }
+            if (!definition.controller().isBlank() && matchesValue(state, definition.controller())) {
+                return true;
+            }
+            for (BlockMatcher matcher : definition.matchers().values()) {
+                if (matcher.role().orElse(null) == PartRole.CONTROLLER && matches(null, BlockPos.ZERO, state, matcher)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static PartRole roleFor(MultiblockDefinition definition, char key, BlockMatcher matcher, boolean controller) {
+            if (controller) {
+                return PartRole.CONTROLLER;
+            }
+            PartRole explicit = definition.roles().get(key);
+            if (explicit != null) {
+                return explicit;
+            }
+            return matcher.role().orElse(PartRole.CASING);
+        }
+
+        private static boolean matches(Level level, BlockPos pos, BlockState state, BlockMatcher matcher) {
+            if (state == null) {
+                return matcher.optional();
+            }
+            return switch (matcher.kind()) {
+                case BLOCK -> blockId(state).equals(matcher.value());
+                case TAG -> matchesTag(state, matcher.value());
+                case STATE -> matchesValue(state, matcher.value());
+                case AIR -> state.isAir();
+                case FLUID -> matchesFluid(state.getFluidState(), matcher.value());
+                case PREDICATE, ANY -> true;
+            };
+        }
+
+        private static boolean matchesValue(BlockState state, String value) {
+            if (value == null || value.isBlank()) {
+                return false;
+            }
+            if (value.startsWith("#")) {
+                return matchesTag(state, value);
+            }
+            String blockId = blockId(state);
+            return blockId.equals(value) || state.toString().equals(value) || state.toString().contains(value);
+        }
+
+        private static boolean matchesTag(BlockState state, String value) {
+            String raw = value.startsWith("#") ? value.substring(1) : value;
+            ResourceLocation id = ResourceLocation.tryParse(raw);
+            return id != null && state.is(TagKey.create(Registries.BLOCK, id));
+        }
+
+        private static boolean matchesFluid(FluidState state, String value) {
+            if (state == null || state.isEmpty()) {
+                return false;
+            }
+            return BuiltInRegistries.FLUID.getKey(state.getType()).toString().equals(value);
+        }
+
+        private static String blockId(BlockState state) {
+            return BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString();
+        }
+
+        private static boolean exposesItems(PartRole role) {
+            return role == PartRole.INPUT_HATCH || role == PartRole.OUTPUT_HATCH || role == PartRole.ITEM_PORT;
+        }
+
+        private static boolean exposesEnergy(PartRole role) {
+            return role == PartRole.ENERGY_PORT;
+        }
+
+        private static boolean exposesFluids(PartRole role) {
+            return role == PartRole.FLUID_PORT;
+        }
+
+        private record PatternOffset(int x, int y, int z) {
+        }
+
+        private enum PatternTransform {
+            NONE(false, Rotation.NONE),
+            CLOCKWISE(false, Rotation.CLOCKWISE),
+            HALF(false, Rotation.HALF),
+            COUNTER_CLOCKWISE(false, Rotation.COUNTER_CLOCKWISE),
+            MIRROR(true, Rotation.NONE),
+            MIRROR_CLOCKWISE(true, Rotation.CLOCKWISE),
+            MIRROR_HALF(true, Rotation.HALF),
+            MIRROR_COUNTER_CLOCKWISE(true, Rotation.COUNTER_CLOCKWISE);
+
+            private final boolean mirrored;
+            private final Rotation rotation;
+
+            PatternTransform(boolean mirrored, Rotation rotation) {
+                this.mirrored = mirrored;
+                this.rotation = rotation;
+            }
+
+            BlockPos apply(int x, int y, int z, int width, int depth) {
+                int mx = mirrored ? width - 1 - x : x;
+                return switch (rotation) {
+                    case NONE -> new BlockPos(mx, y, z);
+                    case CLOCKWISE -> new BlockPos(depth - 1 - z, y, mx);
+                    case HALF -> new BlockPos(width - 1 - mx, y, depth - 1 - z);
+                    case COUNTER_CLOCKWISE -> new BlockPos(z, y, width - 1 - mx);
+                };
+            }
+
+            String serializedName() {
+                return name().toLowerCase(Locale.ROOT);
+            }
+        }
+
+        private enum Rotation {
+            NONE,
+            CLOCKWISE,
+            HALF,
+            COUNTER_CLOCKWISE
+        }
 
         public AssemblyResult assemble(ResourceLocation definitionId, String dimension, BlockPos controllerPos, List<PartMetadata> parts) {
             MultiblockDefinition definition = DEFINITIONS.get(definitionId);

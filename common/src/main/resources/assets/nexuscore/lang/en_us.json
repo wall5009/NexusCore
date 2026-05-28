@@ -24,5 +24,22 @@
   "screen.nexuscore.config.updated": "Updated %s",
   "screen.nexuscore.config.reset_status": "Reset %s",
   "screen.nexuscore.config.reset_all_status": "Reset all options",
-  "screen.nexuscore.config.invalid_integer": "%s expects an integer"
+  "screen.nexuscore.config.invalid_integer": "%s expects an integer",
+  "screen.nexuscore.debug.authoring": "Authoring Editors",
+  "screen.nexuscore.debug.world_hooks": "World Event Hooks",
+  "screen.nexuscore.debug.open_authoring": "Open Authoring Workbench",
+  "screen.nexuscore.authoring": "NexusCore Authoring",
+  "screen.nexuscore.authoring.title": "NexusCore Authoring Workbench",
+  "screen.nexuscore.authoring.session": "Session",
+  "screen.nexuscore.authoring.editors": "Editors",
+  "screen.nexuscore.authoring.open_editor": "Open Editor",
+  "screen.nexuscore.authoring.runtime": "Runtime State",
+  "screen.nexuscore.authoring.done": "Done",
+  "screen.nexuscore.authoring.back": "Back",
+  "screen.nexuscore.authoring.editor.ready": "Ready",
+  "screen.nexuscore.authoring.editor.validate": "Validate",
+  "screen.nexuscore.authoring.editor.export_preview": "Export Preview",
+  "screen.nexuscore.authoring.editor.controls": "Controls",
+  "screen.nexuscore.authoring.editor.canvas": "Rendered Canvas",
+  "screen.nexuscore.authoring.editor.inspector": "Inspector"
 }

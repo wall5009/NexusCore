@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.rollylindenshnizzer.nexuscore.api.NexusIncubating;
 import com.rollylindenshnizzer.nexuscore.core.NexusIds;
 import com.rollylindenshnizzer.nexuscore.data.NexusData;
+import com.rollylindenshnizzer.nexuscore.world.NexusWorldEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
@@ -752,6 +753,131 @@ public final class NexusRituals {
         private final Map<UUID, ActiveRitual> active = new LinkedHashMap<>();
         private final List<TimelineEntry> timeline = new ArrayList<>();
 
+        public List<RitualStartResult> handleWorldEvent(NexusWorldEvent event) {
+            if (!event.serverSide()) {
+                return List.of();
+            }
+            return switch (event.kind()) {
+                case SERVER_TICK_END -> {
+                    tickAll(event.hook());
+                    yield List.of();
+                }
+                case BLOCK_PLACE -> {
+                    disruptAt(event, "world_place:" + event.hook());
+                    yield tryStartAt(event, false);
+                }
+                case BLOCK_BREAK -> {
+                    disruptAt(event, "world_break:" + event.hook());
+                    yield List.of();
+                }
+                case BLOCK_INTERACT -> tryStartAt(event, true);
+                default -> List.of();
+            };
+        }
+
+        public List<RitualProgress> tickAll(String source) {
+            List<UUID> ids = new ArrayList<>(active.keySet());
+            List<RitualProgress> progress = new ArrayList<>();
+            for (UUID id : ids) {
+                progress.add(tick(id));
+            }
+            if (!progress.isEmpty()) {
+                record(new UUID(0L, 0L), "tick_all", source == null ? "world_hook" : source);
+            }
+            return List.copyOf(progress);
+        }
+
+        public List<RitualStartResult> tryStartAt(NexusWorldEvent event, boolean manual) {
+            if (!event.hasBlockContext()) {
+                return List.of();
+            }
+            List<RitualStartResult> results = new ArrayList<>();
+            for (RitualDefinition definition : DEFINITIONS.values()) {
+                if (manual && !definition.manualStart()) {
+                    continue;
+                }
+                if (!manual && !definition.automaticStart()) {
+                    continue;
+                }
+                if (!centerMatches(definition, event)) {
+                    continue;
+                }
+                boolean alreadyActive = active.values().stream()
+                        .anyMatch(activeRitual -> activeRitual.definition().id().equals(definition.id())
+                                && activeRitual.context().dimension().equals(event.dimension())
+                                && activeRitual.context().center().equals(event.pos()));
+                if (alreadyActive) {
+                    continue;
+                }
+                Map<String, String> properties = new LinkedHashMap<>();
+                properties.put("trigger", manual ? "manual_interact" : "automatic_world_event");
+                properties.put("hook", event.hook());
+                properties.put("radius", Integer.toString(defaultRuntimeRadius(definition)));
+                RitualContext context = new RitualContext(event.dimension(), event.pos(), event.playerId(), properties);
+                results.add(start(definition.id(), context, event.hook()));
+            }
+            return List.copyOf(results);
+        }
+
+        private void disruptAt(NexusWorldEvent event, String reason) {
+            if (!event.hasBlockContext()) {
+                return;
+            }
+            List<UUID> affected = active.values().stream()
+                    .filter(ritual -> affects(ritual, event))
+                    .map(ActiveRitual::instanceId)
+                    .toList();
+            for (UUID id : affected) {
+                ActiveRitual ritual = active.get(id);
+                if (ritual == null) {
+                    continue;
+                }
+                if (ritual.definition().pauseWhenMissing()) {
+                    active.put(id, ritual.withMissing(RitualState.PAUSED, reason));
+                    record(id, "pause", reason);
+                } else if (ritual.definition().failurePolicy().failWhenInterrupted()) {
+                    active.remove(id);
+                    record(id, "fail", reason);
+                } else {
+                    active.remove(id);
+                    record(id, "cancel", reason);
+                }
+            }
+        }
+
+        private static boolean affects(ActiveRitual ritual, NexusWorldEvent event) {
+            if (!ritual.context().dimension().equals(event.dimension())) {
+                return false;
+            }
+            int radius = runtimeRadius(ritual.context(), defaultRuntimeRadius(ritual.definition()));
+            BlockPos center = ritual.context().center();
+            BlockPos pos = event.pos();
+            return Math.abs(center.getX() - pos.getX()) <= radius
+                    && Math.abs(center.getY() - pos.getY()) <= radius
+                    && Math.abs(center.getZ() - pos.getZ()) <= radius;
+        }
+
+        private static boolean centerMatches(RitualDefinition definition, NexusWorldEvent event) {
+            if (definition.center() == null || definition.center().isBlank()) {
+                return false;
+            }
+            String center = definition.center();
+            return event.blockId().equals(center)
+                    || event.optionalState().map(state -> state.toString().equals(center) || state.toString().contains(center)).orElse(false);
+        }
+
+        private static int defaultRuntimeRadius(RitualDefinition definition) {
+            return Math.min(limits.maxRadius(), Math.max(1, definition.requiredStructures().isEmpty() ? 8 : 16));
+        }
+
+        private static int runtimeRadius(RitualContext context, int fallback) {
+            try {
+                return Math.min(limits.maxRadius(), Math.max(1, Integer.parseInt(context.properties().getOrDefault("radius", Integer.toString(fallback)))));
+            } catch (NumberFormatException exception) {
+                return fallback;
+            }
+        }
+
         public RitualStartResult start(ResourceLocation ritualId, RitualContext context, String source) {
             RitualDefinition definition = DEFINITIONS.get(ritualId);
             if (definition == null) {
@@ -857,6 +983,12 @@ public final class NexusRituals {
 
         public ActiveRitual withProgress(RitualState state, int ticks) {
             return new ActiveRitual(instanceId, definition, context, state, ticks, stability, source, startedAt, missingRequirements);
+        }
+
+        public ActiveRitual withMissing(RitualState state, String missingRequirement) {
+            List<String> missing = new ArrayList<>(missingRequirements);
+            missing.add(missingRequirement);
+            return new ActiveRitual(instanceId, definition, context, state, ticks, stability, source, startedAt, missing);
         }
     }
 

@@ -149,7 +149,9 @@ public final class NexusProgression {
             plan.data("nexuscore/progression/" + id.getPath() + ".json", toJson());
             plan.translation(NexusIds.translationKey("progression", id), NexusIds.humanName(id.getPath()));
             for (String page : guidePages) {
-                plan.translation("nexuscore.guide." + page.replace('/', '.'), NexusIds.humanName(page));
+                ResourceLocation pageId = NexusIds.parse(page);
+                String translationPath = pageId.getNamespace() + "." + pageId.getPath().replace('/', '.');
+                plan.translation("nexuscore.guide." + translationPath, NexusIds.humanName(pageId.getPath()));
             }
             return plan;
         }

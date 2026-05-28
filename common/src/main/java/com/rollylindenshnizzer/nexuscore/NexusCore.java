@@ -7,6 +7,7 @@ import com.mojang.logging.LogUtils;
 import com.rollylindenshnizzer.nexuscore.debug.NexusDebugWorkbench;
 import com.rollylindenshnizzer.nexuscore.registry.NexusRegistries;
 import com.rollylindenshnizzer.nexuscore.runtime.NexusRuntimeContent;
+import com.rollylindenshnizzer.nexuscore.world.NexusWorldEventHooks;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
@@ -40,6 +41,7 @@ public final class NexusCore {
         NexusLifecycle.installArchitecturyHooks();
         NexusDebugWorkbench.installV13Tabs();
         NexusCoreCommands.install();
+        NexusWorldEventHooks.install();
         NexusLifecycle.fire(NexusLifecycle.Phase.PRE_INIT);
         NexusRuntimeContent.install(MOD_ID);
         NexusRegistries.registerAll(MOD_ID);
