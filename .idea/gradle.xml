@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/common" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/fabric" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/fabric_1_20_1" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/fabric_1_21_1" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/fabric_26_1_2" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/forge" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/forge_1_20_1" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/mc_1_20_1" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/mc_1_21_1" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/mc_26_1_2" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/neoforge" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/neoforge_1_21_1" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/neoforge_26_1_2" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/quilt" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/quilt_1_20_1" />
+            <option value="$PROJECT_DIR$/nexuscore-adapters/quilt_1_21_1" />
+            <option value="$PROJECT_DIR$/nexuscore-api" />
+            <option value="$PROJECT_DIR$/nexuscore-core" />
+            <option value="$PROJECT_DIR$/nexuscore-full" />
+            <option value="$PROJECT_DIR$/nexuscore-gradle" />
+            <option value="$PROJECT_DIR$/nexuscore-modules" />
+            <option value="$PROJECT_DIR$/nexuscore-modules/advanced" />
+            <option value="$PROJECT_DIR$/nexuscore-modules/client" />
+            <option value="$PROJECT_DIR$/nexuscore-modules/commands" />
+            <option value="$PROJECT_DIR$/nexuscore-modules/config" />
+            <option value="$PROJECT_DIR$/nexuscore-modules/datagen" />
+            <option value="$PROJECT_DIR$/nexuscore-modules/events" />
+            <option value="$PROJECT_DIR$/nexuscore-modules/networking" />
+            <option value="$PROJECT_DIR$/nexuscore-modules/registry" />
+            <option value="$PROJECT_DIR$/nexuscore-modules/ui" />
+            <option value="$PROJECT_DIR$/nexuscore-modules/world" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/common" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/fabric" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/fabric_1_20_1" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/fabric_1_21_1" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/fabric_26_1_2" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/forge" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/forge_1_20_1" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/mc_1_20_1" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/mc_1_21_1" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/mc_26_1_2" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/neoforge" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/neoforge_1_21_1" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/neoforge_26_1_2" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/quilt" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/quilt_1_20_1" />
+            <option value="$PROJECT_DIR$/nexuscore-testmod/quilt_1_21_1" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

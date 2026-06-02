@@ -1,10 +1,8 @@
 .gradle/
 build/
-/.architectury-transformer/
-*/build/
 out/
-.idea/
 *.iml
-run/
-runs/
-.DS_Store
+.idea/workspace.xml
+**/build/
+**/run/
+**/src/generated/

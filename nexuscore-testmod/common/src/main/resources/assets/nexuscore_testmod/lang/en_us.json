@@ -1,0 +1,6 @@
+{
+  "item.nexuscore_testmod.test_gem": "Test Gem",
+  "block.nexuscore_testmod.test_block": "Test Block",
+  "itemGroup.nexuscore_testmod.test_tab": "NexusCore Test Mod",
+  "commands.nexuscore_testmod.test": "Hello from NexusCore!"
+}
